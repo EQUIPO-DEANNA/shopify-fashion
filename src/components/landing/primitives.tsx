@@ -58,12 +58,17 @@ export function CTA({
   className,
   onClick,
   href,
+  type = "button",
+  disabled = false,
 }: {
   children: ReactNode;
   variant?: "solid" | "outline" | "electric" | "ghost-light";
   className?: string;
   onClick?: () => void;
   href?: string;
+  /** "submit" so a CTA can be the primary action of a real form. */
+  type?: "button" | "submit";
+  disabled?: boolean;
 }) {
   const variants = {
     solid:
@@ -78,6 +83,7 @@ export function CTA({
   const classes = cn(
     "inline-flex items-center justify-center gap-2 px-7 py-4 text-[0.7rem] font-semibold uppercase tracking-[0.16em] transition-all duration-300",
     variants[variant],
+    disabled && "pointer-events-none opacity-50",
     className,
   );
   if (href) {
@@ -88,7 +94,7 @@ export function CTA({
     );
   }
   return (
-    <button type="button" onClick={onClick} className={classes}>
+    <button type={type} onClick={onClick} disabled={disabled} className={classes}>
       {children}
     </button>
   );

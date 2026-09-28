@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAnalyseRouteImport } from './routes/api.analyse'
+import { Route as ApiBriefRouteImport } from './routes/api.brief'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAnalyseRoute = ApiAnalyseRouteImport.update({
+  id: '/api/analyse',
+  path: '/api/analyse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBriefRoute = ApiBriefRouteImport.update({
+  id: '/api/brief',
+  path: '/api/brief',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/analyse': typeof ApiAnalyseRoute
+  '/api/brief': typeof ApiBriefRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/analyse': typeof ApiAnalyseRoute
+  '/api/brief': typeof ApiBriefRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/analyse': typeof ApiAnalyseRoute
+  '/api/brief': typeof ApiBriefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/analyse' | '/api/brief'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/analyse' | '/api/brief'
+  id: '__root__' | '/' | '/api/analyse' | '/api/brief'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiAnalyseRoute: typeof ApiAnalyseRoute
+  ApiBriefRoute: typeof ApiBriefRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/analyse': {
+      id: '/api/analyse'
+      path: '/api/analyse'
+      fullPath: '/api/analyse'
+      preLoaderRoute: typeof ApiAnalyseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/brief': {
+      id: '/api/brief'
+      path: '/api/brief'
+      fullPath: '/api/brief'
+      preLoaderRoute: typeof ApiBriefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiAnalyseRoute: ApiAnalyseRoute,
+  ApiBriefRoute: ApiBriefRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

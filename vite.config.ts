@@ -12,4 +12,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Pinned rather than auto-detected. Left alone, a production build defaults to
+  // `cloudflare-module`, which emits an output layout Vercel cannot run — and the
+  // failure shows up as a deploy that builds cleanly and then 404s, which is a
+  // slow thing to diagnose. NITRO_PRESET still wins for a local standalone build:
+  //   NITRO_PRESET=node_server npm run build && node .output/server/index.mjs
+  // Inside a Lovable build LOVABLE_NITRO_PRESET pins the preset and this is ignored.
+  nitro: { preset: process.env["NITRO_PRESET"] ?? "vercel" },
 });
