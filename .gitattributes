@@ -1,0 +1,19 @@
+# Check every text file out with LF, on every platform.
+#
+# Without this, a clone on Windows writes CRLF, and the repo then fails its own
+# `npm run lint`: prettier is configured for LF, so it reports every line of
+# every file as an error — six thousand of them, none of them real. Pinning the
+# line ending here fixes it for everyone rather than in each person's git config.
+* text=auto eol=lf
+
+# Generated, and large. Keep it out of diffs.
+bun.lock linguist-generated=true -diff
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary

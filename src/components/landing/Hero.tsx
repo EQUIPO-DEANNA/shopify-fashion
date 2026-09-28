@@ -3,7 +3,10 @@ import { PhoneDemo } from "./PhoneDemo";
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden bg-background px-5 pb-20 pt-28 sm:px-8 md:pb-28 md:pt-32">
+    <section
+      id="top"
+      className="relative overflow-hidden bg-background px-5 pb-20 pt-28 sm:px-8 md:pb-28 md:pt-32"
+    >
       <div className="mx-auto grid w-full max-w-[1280px] items-center gap-16 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <Reveal>

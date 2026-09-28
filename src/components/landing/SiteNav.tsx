@@ -23,7 +23,9 @@ export function SiteNav() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        solid ? "border-b border-border bg-background/85 backdrop-blur-xl" : "border-b border-transparent",
+        solid
+          ? "border-b border-border bg-background/85 backdrop-blur-xl"
+          : "border-b border-transparent",
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between px-5 sm:px-8">

@@ -31,7 +31,9 @@ export function PhoneDemo({ className }: { className?: string }) {
       <div
         className={cn(
           "absolute -left-4 top-10 z-20 flex items-center gap-2 border border-border bg-card px-4 py-3 shadow-float transition-all duration-700 sm:-left-10",
-          stage === "done" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
+          stage === "done"
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-3 opacity-0",
         )}
       >
         <span className="text-electric">✨</span>
@@ -85,7 +87,11 @@ export function PhoneDemo({ className }: { className?: string }) {
               <div className="absolute inset-0 shimmer-sweep bg-foreground/10" />
             )}
             <div className="absolute left-3 top-3 border border-card/70 bg-foreground/60 px-2 py-1 text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-primary-foreground">
-              {stage === "idle" ? "Your photo" : stage === "processing" ? "Generating" : "Your look"}
+              {stage === "idle"
+                ? "Your photo"
+                : stage === "processing"
+                  ? "Generating"
+                  : "Your look"}
             </div>
           </div>
 
@@ -112,7 +118,9 @@ export function PhoneDemo({ className }: { className?: string }) {
                   height={1104}
                   className="h-14 w-full object-cover"
                 />
-                <span className="text-[0.55rem] font-semibold uppercase tracking-[0.14em]">{p}</span>
+                <span className="text-[0.55rem] font-semibold uppercase tracking-[0.14em]">
+                  {p}
+                </span>
               </button>
             ))}
           </div>
@@ -124,7 +132,11 @@ export function PhoneDemo({ className }: { className?: string }) {
               onClick={() => setStage(stage === "done" ? "idle" : "processing")}
               className="w-full bg-electric px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-electric-foreground transition-all hover:brightness-110"
             >
-              {stage === "idle" ? "Try it on" : stage === "processing" ? "Generating…" : "Try another"}
+              {stage === "idle"
+                ? "Try it on"
+                : stage === "processing"
+                  ? "Generating…"
+                  : "Try another"}
             </button>
           </div>
 

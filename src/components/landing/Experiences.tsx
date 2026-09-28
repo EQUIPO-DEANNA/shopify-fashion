@@ -43,7 +43,10 @@ export function CoreIdea() {
           <span className="font-display text-4xl text-electric">→</span>
         </div>
 
-        <Reveal delay={120} className="border border-foreground/20 bg-foreground p-8 text-primary-foreground">
+        <Reveal
+          delay={120}
+          className="border border-foreground/20 bg-foreground p-8 text-primary-foreground"
+        >
           <p className="eyebrow text-primary-foreground/60">After</p>
           <img
             src={sceneCity}
@@ -72,7 +75,15 @@ export function CoreIdea() {
   );
 }
 
-const scenes = ["Ibiza", "Madrid", "Beach Club", "Golf Course", "City", "Luxury Hotel", "Ski Resort"];
+const scenes = [
+  "Ibiza",
+  "Madrid",
+  "Beach Club",
+  "Golf Course",
+  "City",
+  "Luxury Hotel",
+  "Ski Resort",
+];
 
 const influencerScenes = [
   "At the beach with our ambassador",
@@ -150,7 +161,11 @@ function TryOnVisual() {
           height={1408}
           className="h-48 w-full object-cover"
         />
-        <span className={cn("font-display text-2xl", on ? "text-electric" : "text-muted-foreground")}>→</span>
+        <span
+          className={cn("font-display text-2xl", on ? "text-electric" : "text-muted-foreground")}
+        >
+          →
+        </span>
         <div className="relative h-48 w-full overflow-hidden bg-muted">
           <img
             src={sceneCity}
@@ -317,7 +332,10 @@ export function SixExperiences() {
         <CardShell
           index="05"
           title="Bring it to life"
-          lines={["Turn the generated fashion image into video.", "The person walks. The camera moves. Clothes move naturally."]}
+          lines={[
+            "Turn the generated fashion image into video.",
+            "The person walks. The camera moves. Clothes move naturally.",
+          ]}
         >
           <div className="relative h-52 overflow-hidden">
             <img
@@ -424,7 +442,9 @@ export function ShopTheExperience() {
                   <span
                     className={cn(
                       "border px-4 py-3",
-                      i === 3 ? "border-electric bg-electric text-electric-foreground" : "border-border",
+                      i === 3
+                        ? "border-electric bg-electric text-electric-foreground"
+                        : "border-border",
                     )}
                   >
                     {s}

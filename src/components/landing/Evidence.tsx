@@ -73,8 +73,8 @@ export function EngagementLoop() {
           </Reveal>
           <Reveal delay={120}>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-muted-foreground">
-              The longer customers interact with your products, the more opportunities your brand has
-              to create desire, collect intent signals and generate a purchase.
+              The longer customers interact with your products, the more opportunities your brand
+              has to create desire, collect intent signals and generate a purchase.
             </p>
           </Reveal>
         </div>
