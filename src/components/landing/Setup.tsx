@@ -133,7 +133,7 @@ const FIELD_STEP: Record<string, number> = {
   contactEmail: 5,
 };
 
-type Handoff = { started: boolean; message: string; jobId?: string };
+type Handoff = { started: boolean; message: string; url?: string; reason?: string };
 type Submitted = { brand: Brand; filename: string; handoff: Handoff };
 
 export function Wizard() {
@@ -271,11 +271,33 @@ export function Wizard() {
     return (
       <Section id="setup" tone="paper">
         <Reveal>
-          <Eyebrow>Brief received</Eyebrow>
-          <h2 className="display-lg mt-6">{submitted.brand.name} is on its way.</h2>
+          <Eyebrow>{submitted.handoff.started ? "Building now" : "Brief received"}</Eyebrow>
+          <h2 className="display-lg mt-6">
+            {submitted.handoff.started
+              ? `${submitted.brand.name} is being built.`
+              : `${submitted.brand.name} is on its way.`}
+          </h2>
         </Reveal>
         <Reveal delay={120} className="mt-12 border border-border bg-card p-8 md:p-12">
           <p className="text-base leading-relaxed">{submitted.handoff.message}</p>
+
+          {submitted.handoff.started && submitted.handoff.url && (
+            <div className="mt-8 border border-electric/40 bg-electric/5 p-6">
+              <p className="eyebrow text-electric">Your experience will be here</p>
+              <a
+                href={submitted.handoff.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 block break-all font-display text-xl font-bold underline decoration-electric underline-offset-4"
+              >
+                {submitted.handoff.url}
+              </a>
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                It takes a few minutes. The link will not work until it finishes, so give it a
+                moment before you try.
+              </p>
+            </div>
+          )}
 
           <dl className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-2">
             {[
@@ -284,7 +306,6 @@ export function Wizard() {
               ["Host", submitted.brand.host.name],
               ["Language", submitted.brand.language === "en" ? "English" : "Spanish"],
               ["Scenes", String(submitted.brand.scenes.length)],
-              ...(submitted.handoff.jobId ? [["Build", submitted.handoff.jobId]] : []),
             ].map(([label, value]) => (
               <div key={label} className="bg-card px-6 py-5">
                 <dt className="eyebrow">{label}</dt>

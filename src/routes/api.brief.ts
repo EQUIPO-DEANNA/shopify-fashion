@@ -1,46 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { normaliseBrief } from "@/lib/intake/brief";
+import { dispatchBuild, type Handoff } from "@/lib/intake/dispatch";
 import { callerKey, rateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/brief   { name, storeUrl, world, ... }  ->  { brand, handoff }
  *
- * Turns a submission into the brief the factory builds from, and hands it on.
+ * Turns a submission into the brief the factory builds from, and starts the
+ * build. From here a brand's experience is assembled and published without
+ * anyone touching it.
  *
- * What it does NOT do is pretend. If no factory is configured, the response
- * says the brief was produced and is waiting for a human — it does not report a
- * build that never started. A brand told "your experience is being built" who
- * then hears nothing for a week is worse off than one told the truth.
+ * What it does NOT do is pretend. When a build cannot be started — nothing
+ * configured, the day's budget spent, the brand already has an experience — the
+ * response says so and says a person will pick it up. A brand told "your
+ * experience is being built" who then hears nothing for a week is worse off
+ * than one told the truth.
  *
- * Nothing is written here. The brief goes back to the browser (which can
- * download it) and onward to the factory if one is reachable. This service
- * keeps no copy, which is the whole point: brands hand us addresses, not files.
+ * Nothing is written here. The brief goes back to the browser, which can
+ * download it, and onward to the factory. GitHub holds the running job, Vercel
+ * holds the finished site, and this service keeps no copy of either: brands
+ * hand us addresses, not files.
  */
 
 const LIMIT = 6;
 const WINDOW_MS = 30 * 60 * 1000;
 
-type Handoff = {
-  /** Did a factory accept the brief and start work? */
-  started: boolean;
-  /** What actually happens next, in words a brand can act on. */
-  message: string;
-  /** Present when a factory took it and gave us something to watch. */
-  jobId?: string;
-};
-
-function factoryEndpoint(): string | null {
-  const base = process.env["FACTORY_URL"]?.trim();
-  if (!base) return null;
-  return `${base.replace(/\/+$/, "")}/api/brief`;
-}
-
 /**
- * Tell the team a brand came in. Best effort by design: a brief that reached us
- * is not lost because a chat webhook was down, so a failure here is logged and
- * swallowed rather than turned into an error the brand has to read.
+ * Tell the team a brand came in, with the brief itself rather than a summary.
+ *
+ * The brief is a few hundred bytes of text and it is the only artefact of a
+ * submission that exists anywhere, so a one-line "a brand submitted" would
+ * leave the actual thing nowhere but the brand's own browser. Best effort by
+ * design: a brief that reached us is not lost because a chat webhook was down.
  */
-async function notify(summary: string): Promise<void> {
+async function notify(payload: Record<string, unknown>): Promise<void> {
   const url = process.env["INTAKE_WEBHOOK_URL"]?.trim();
   if (!url) return;
   try {
@@ -50,7 +43,7 @@ async function notify(summary: string): Promise<void> {
       await fetch(url, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: summary }),
+        body: JSON.stringify(payload),
         signal: controller.signal,
       });
     } finally {
@@ -89,69 +82,20 @@ export const Route = createFileRoute("/api/brief")({
 
         const { brand } = result;
         const filename = `${brand.slug}.json`;
+        const handoff: Handoff = await dispatchBuild(brand);
 
-        let handoff: Handoff = {
-          started: false,
-          message:
-            "Your brief is ready. Our team reviews it and builds the experience — " +
-            "usually within a working day. Keep the file: it is everything we hold about you.",
-        };
-
-        const endpoint = factoryEndpoint();
-        if (endpoint) {
-          try {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 20_000);
-            let response: Response;
-            try {
-              const token = process.env["FACTORY_TOKEN"]?.trim();
-              response = await fetch(endpoint, {
-                method: "POST",
-                headers: {
-                  "content-type": "application/json",
-                  ...(token ? { authorization: `Bearer ${token}` } : {}),
-                },
-                body: JSON.stringify(brand),
-                signal: controller.signal,
-              });
-            } finally {
-              clearTimeout(timer);
-            }
-
-            if (response.ok) {
-              const accepted = (await response.json().catch(() => ({}))) as { id?: unknown };
-              handoff = {
-                started: true,
-                message: "Your brief is with the studio and the build has been queued.",
-                ...(typeof accepted.id === "string" ? { jobId: accepted.id } : {}),
-              };
-            } else {
-              // The brief is still valid and still in the brand's hands. Say
-              // what happened without making it their problem to solve.
-              console.error("[api/brief] factory returned", response.status);
-              handoff = {
-                started: false,
-                message:
-                  "Your brief is ready, but the studio did not pick it up automatically. " +
-                  "We have been told, and someone will take it from here.",
-              };
-            }
-          } catch (error) {
-            console.error("[api/brief] factory unreachable:", (error as Error).message);
-            handoff = {
-              started: false,
-              message:
-                "Your brief is ready. We could not reach the studio just now, so a human " +
-                "will pick it up — nothing is lost.",
-            };
-          }
-        }
-
-        await notify(
-          `New brand brief: ${brand.name} (${brand.store.domain})` +
+        // The whole brief, so whoever reads the notification can act on it
+        // without going back to the brand for anything.
+        await notify({
+          text:
+            `${handoff.started ? "Building" : "New brief, waiting for a human"}: ` +
+            `${brand.name} (${brand.store.domain})` +
             `${brand.intake.contactEmail ? ` — ${brand.intake.contactEmail}` : ""}` +
-            ` — ${handoff.started ? "queued" : "waiting for a human"}`,
-        );
+            `${handoff.url ? ` — ${handoff.url}` : ""}`,
+          started: handoff.started,
+          ...(handoff.reason ? { reason: handoff.reason } : {}),
+          brief: brand,
+        });
 
         return Response.json({ ok: true, brand, filename, handoff });
       },
