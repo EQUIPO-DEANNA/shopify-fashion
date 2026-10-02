@@ -24,10 +24,9 @@ node .output/server/index.mjs
 
 1. Import `EQUIPO-DEANNA/shopify-fashion` as a new Vercel project.
 2. Leave every build setting at its default. Vercel reads `.vercel/output`.
-3. Environment variables: none are required. See `.env.example` for the
-   optional ones, and add them for Production before the first deploy if you
-   want them — they are read at request time, so adding them later works too,
-   but only after a redeploy.
+3. Environment variables: none are required for the site to work. The form will
+   read a brand's catalogue and produce a brief, and tell them a person will
+   take it from there. See `.env.example`.
 4. Deploy.
 
 Check afterwards that the intake actually reads a shop, because that is the one
@@ -40,6 +39,27 @@ curl -s -X POST https://<deployment>/api/analyse \
 ```
 
 You should get counts and families back, not an error.
+
+## Turning on the automatic builds
+
+One variable decides whether submitting the form starts a real build or waits
+for a person:
+
+```
+GITHUB_FACTORY_TOKEN=<may dispatch to EQUIPO-DEANNA/brand-factory>
+```
+
+Make it a fine-grained token scoped to `brand-factory` alone. It lives in a
+public-facing web app, so the damage a leak can do should stop at one repo.
+
+The factory side needs its own setup first — see
+[AUTOMATION.md](https://github.com/EQUIPO-DEANNA/brand-factory/blob/main/AUTOMATION.md).
+Setting this token while the factory has no keys produces builds that start and
+then fail, which is worse than not starting them, so do the factory first.
+
+Check it end to end by submitting the form and watching Actions on
+`brand-factory`. A submission that did not dispatch says so on the page; it
+never claims a build it did not start.
 
 ## Connecting deannafashion.com
 
