@@ -7,7 +7,7 @@
  * the ways it must REFUSE, and about failing closed when it cannot tell.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dispatchBuild, experienceUrl } from "./dispatch";
+import { buildsUrl, dispatchBuild } from "./dispatch";
 import type { Brand } from "./brief";
 
 const BRAND: Brand = {
@@ -82,9 +82,14 @@ describe("dispatchBuild", () => {
     const handoff = await dispatchBuild(BRAND);
 
     expect(handoff.started).toBe(true);
-    expect(handoff.url).toBe("https://casa-mares.vercel.app");
-    expect(handoff.message).toContain("https://casa-mares.vercel.app");
     expect(gh.dispatched()).toBe(true);
+    // Deliberately promises no address. A *.vercel.app name is global across
+    // all of Vercel, so the slug's is usually already a stranger's — the first
+    // brand built this way was announced at northbound.vercel.app, which is
+    // somebody's newsletter product.
+    expect(handoff.url).toBeUndefined();
+    expect(handoff.message).not.toMatch(/vercel\.app/);
+    expect(handoff.message).toMatch(/send you the address/);
   });
 
   it("sends the brief itself, under the event the workflow listens for", async () => {
@@ -118,7 +123,7 @@ describe("dispatchBuild", () => {
 
     expect(handoff.started).toBe(false);
     expect(handoff.reason).toBe("ALREADY_EXISTS");
-    expect(handoff.url).toBe("https://casa-mares.vercel.app");
+    expect(handoff.url).toBeUndefined();
     expect(gh.dispatched()).toBe(false);
   });
 
@@ -195,10 +200,22 @@ describe("dispatchBuild", () => {
   });
 });
 
-describe("experienceUrl", () => {
-  it("matches the Vercel project the factory creates", () => {
-    // deployToVercel links `--project=<slug>`, so this address is deterministic
-    // and we can tell the brand where to look before the build has finished.
-    expect(experienceUrl("bumpers")).toBe("https://bumpers.vercel.app");
+describe("never inventing an address", () => {
+  it("promises no URL on any path", async () => {
+    // Every one of these once returned https://<slug>.vercel.app. Those names
+    // are global, so the slug's is usually somebody else's site, and pointing a
+    // brand at a stranger's page is worse than pointing them nowhere.
+    for (const options of [{}, { repoExists: true }, { runsToday: 99 }, { dispatchStatus: 500 }]) {
+      stubGitHub(options);
+      const handoff = await dispatchBuild(BRAND);
+      expect(handoff.url).toBeUndefined();
+      expect(handoff.message).not.toMatch(/vercel\.app/);
+    }
+  });
+
+  it("points at the builds, which is an address we do control", () => {
+    expect(buildsUrl()).toBe(
+      "https://github.com/EQUIPO-DEANNA/brand-factory/actions/workflows/build-brand.yml",
+    );
   });
 });

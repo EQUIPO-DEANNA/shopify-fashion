@@ -55,9 +55,20 @@ function token(): string | null {
   return process.env["GITHUB_FACTORY_TOKEN"]?.trim() || null;
 }
 
-/** The address a finished experience gets. Vercel names the project after the slug. */
-export function experienceUrl(slug: string): string {
-  return `https://${slug}.vercel.app`;
+/**
+ * Where to watch a build happen.
+ *
+ * Deliberately NOT the finished site's address. There was a version of this
+ * that returned `https://<slug>.vercel.app`, on the reasoning that the deploy
+ * names the project after the slug — but those names are global across all of
+ * Vercel, so a plain word is usually already somebody else's. The first brand
+ * built this way was announced at northbound.vercel.app, which is a stranger's
+ * newsletter product. Sending a brand to that is worse than sending them
+ * nowhere, so the real address is read from the deploy and reported when it
+ * exists, and nothing is promised before then.
+ */
+export function buildsUrl(): string {
+  return `https://github.com/${FACTORY_REPO}/actions/workflows/${WORKFLOW}`;
 }
 
 async function gh(path: string, init: RequestInit = {}, timeoutMs = 10_000): Promise<Response> {
@@ -139,10 +150,9 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
     return {
       started: false,
       reason: "ALREADY_EXISTS",
-      url: experienceUrl(brand.slug),
       message:
         `There is already an experience for ${brand.name}. We have not built over it. ` +
-        "Someone will check whether you wanted it rebuilt.",
+        "Someone will check whether you wanted it rebuilt, and send you the address.",
     };
   }
 
@@ -175,10 +185,10 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
     if (res.status === 204) {
       return {
         started: true,
-        url: experienceUrl(brand.slug),
         message:
-          "Your experience is being built now. It takes a few minutes, and it will appear at " +
-          `${experienceUrl(brand.slug)}.`,
+          "Your experience is being built now. It takes about ten minutes. We will send you " +
+          "the address the moment it is live — we cannot tell you where it will be until it " +
+          "has been published.",
       };
     }
 
