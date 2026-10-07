@@ -3,8 +3,12 @@
 The page a fashion brand lands on, and the form that turns them into a brief the
 factory can build an AI try-on experience from.
 
-**Live app**: https://pixel-perfect-render-9588.lovable.app
+**Live**: https://deannafashion.com
 **Editor**: [Lovable](https://lovable.dev/projects/2debb98d-f9a6-462e-a836-df4007d5d955)
+
+The site is Spanish. English is a toggle in the nav, and `npm run i18n:check`
+fails if a string has no English, because a half-translated page is the kind of
+fault nobody notices until it is in front of an investor.
 
 ## What it does
 
@@ -18,7 +22,9 @@ works for real:
    anything about their catalogue that a human should look at.
 3. They describe their world, their host and their scenes.
 4. We produce the brief the [brand factory](https://github.com/EQUIPO-DEANNA/brand-factory)
-   builds from, hand it to them, and pass it on.
+   builds from, and start the build.
+5. The page waits with them, polling, and shows the address once the site is
+   live — usually eight to twelve minutes. Nobody touches anything in between.
 
 ## We store nothing
 
