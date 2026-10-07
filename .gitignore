@@ -7,6 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Secrets. Only .env.example belongs in the repo, and it holds no values.
+# This repo is public, so a stray .env is not a near miss, it is a disclosure.
+.env
+.env.*
+!.env.example
+
 node_modules
 dist
 dist-ssr
