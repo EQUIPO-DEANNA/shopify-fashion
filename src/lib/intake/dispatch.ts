@@ -139,8 +139,8 @@ async function buildsToday(): Promise<number | null> {
  */
 export async function dispatchBuild(brand: Brand): Promise<Handoff> {
   const waiting =
-    "Your brief is ready. Our team reviews it and builds the experience, " +
-    "usually within a working day. Keep the file: it is everything we hold about you.";
+    "Tenemos tu ficha. La revisamos y construimos la experiencia, normalmente en un día " +
+    "laborable. Te escribimos en cuanto esté.";
 
   if (!token()) {
     return { started: false, reason: "NOT_CONFIGURED", message: waiting };
@@ -151,8 +151,8 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
       started: false,
       reason: "ALREADY_EXISTS",
       message:
-        `There is already an experience for ${brand.name}. We have not built over it. ` +
-        "Someone will check whether you wanted it rebuilt, and send you the address.",
+        `Ya existe una experiencia para ${brand.name}. No la hemos sobrescrito. ` +
+        "Alguien comprueba si querías rehacerla y te manda la dirección.",
     };
   }
 
@@ -165,8 +165,8 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
       started: false,
       reason: "AT_CAPACITY",
       message:
-        "Your brief is ready. We build a limited number of experiences a day and today's are " +
-        "spoken for, so yours goes to a person rather than into a queue. Nothing is lost.",
+        "Tenemos tu ficha. Construimos un número limitado de experiencias al día y las de hoy ya " +
+        "están cogidas, así que la tuya pasa a una persona en vez de a una cola. No se pierde nada.",
     };
   }
 
@@ -185,10 +185,7 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
     if (res.status === 204) {
       return {
         started: true,
-        message:
-          "Your experience is being built now. It takes about ten minutes. We will send you " +
-          "the address the moment it is live — we cannot tell you where it will be until it " +
-          "has been published.",
+        message: "Estamos construyendo tu experiencia. Tarda unos diez minutos.",
       };
     }
 
@@ -197,8 +194,8 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
       started: false,
       reason: "DISPATCH_FAILED",
       message:
-        "Your brief is ready, but the studio did not pick it up automatically. We have been " +
-        "told, and someone will take it from here.",
+        "Tenemos tu ficha, pero el estudio no la ha recogido automáticamente. Ya lo sabemos y " +
+        "alguien sigue desde aquí.",
     };
   } catch (error) {
     console.error(`[dispatch] unreachable: ${(error as Error).message}`);
@@ -206,8 +203,104 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
       started: false,
       reason: "DISPATCH_FAILED",
       message:
-        "Your brief is ready. We could not reach the studio just now, so a person will pick " +
-        "it up. Nothing is lost.",
+        "Tenemos tu ficha. Ahora mismo no hemos podido avisar al estudio, así que la recoge una " +
+        "persona. No se pierde nada.",
     };
+  }
+}
+
+/* ------------------------------------------------------------ watching one */
+
+export type BuildState = "building" | "done" | "failed" | "unknown";
+
+export type BuildStatus = {
+  state: BuildState;
+  /** Present once the site is published. */
+  url?: string;
+  /** The run, for us rather than for the brand. */
+  run?: string;
+  /** Minutes since the run started, so the page can say something true. */
+  minutes?: number;
+};
+
+/**
+ * Where a brand's build has got to.
+ *
+ * Holds nothing. GitHub knows whether the run is going, and the run itself
+ * writes `deployments/<slug>.json` when the site is published, so between them
+ * they answer the question without this service remembering anything.
+ *
+ * The deployment record is checked FIRST. A run can report "completed" a few
+ * seconds before its last step finishes writing, and a page that says "failed"
+ * to a brand whose site is actually live is the worst of the four answers.
+ */
+export async function buildStatus(slug: string): Promise<BuildStatus> {
+  if (!token()) return { state: "unknown" };
+
+  try {
+    const record = await gh(`/repos/${FACTORY_REPO}/contents/deployments/${slug}.json?ref=main`);
+    if (record.status === 200) {
+      const body = (await record.json()) as { content?: string; encoding?: string };
+      if (body.content && body.encoding === "base64") {
+        const decoded = JSON.parse(Buffer.from(body.content, "base64").toString("utf8")) as {
+          url?: unknown;
+          run?: unknown;
+        };
+        if (typeof decoded.url === "string" && decoded.url) {
+          return {
+            state: "done",
+            url: decoded.url,
+            ...(typeof decoded.run === "string" ? { run: decoded.run } : {}),
+          };
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`[status] could not read the deployment record: ${(error as Error).message}`);
+  }
+
+  try {
+    // Runs are named after the slug — a repository_dispatch hands back no run
+    // id, so the name is the only thread between a submission and its build.
+    const res = await gh(`/repos/${FACTORY_REPO}/actions/workflows/${WORKFLOW}/runs?per_page=20`);
+    if (!res.ok) return { state: "unknown" };
+
+    const body = (await res.json()) as {
+      workflow_runs?: {
+        name?: unknown;
+        status?: unknown;
+        conclusion?: unknown;
+        html_url?: unknown;
+        run_started_at?: unknown;
+      }[];
+    };
+
+    const run = (body.workflow_runs ?? []).find((candidate) => candidate.name === slug);
+    if (!run) return { state: "unknown" };
+
+    const url = typeof run.html_url === "string" ? run.html_url : undefined;
+    const startedAt = typeof run.run_started_at === "string" ? Date.parse(run.run_started_at) : NaN;
+    const minutes = Number.isFinite(startedAt)
+      ? Math.max(0, Math.round((Date.now() - startedAt) / 60_000))
+      : undefined;
+
+    const finished = run.status === "completed";
+    if (!finished) {
+      return {
+        state: "building",
+        ...(url ? { run: url } : {}),
+        ...(minutes === undefined ? {} : { minutes }),
+      };
+    }
+
+    // Completed without a deployment record means the run finished and nothing
+    // was published — which the workflow now treats as a failure too.
+    return {
+      state: run.conclusion === "success" ? "unknown" : "failed",
+      ...(url ? { run: url } : {}),
+    };
+  } catch (error) {
+    console.error(`[status] could not read the runs: ${(error as Error).message}`);
+    return { state: "unknown" };
   }
 }

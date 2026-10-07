@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAnalyseRouteImport } from './routes/api.analyse'
 import { Route as ApiBriefRouteImport } from './routes/api.brief'
+import { Route as ApiBuildStatusRouteImport } from './routes/api.build-status'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const ApiBriefRoute = ApiBriefRouteImport.update({
   path: '/api/brief',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBuildStatusRoute = ApiBuildStatusRouteImport.update({
+  id: '/api/build-status',
+  path: '/api/build-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/analyse': typeof ApiAnalyseRoute
   '/api/brief': typeof ApiBriefRoute
+  '/api/build-status': typeof ApiBuildStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/analyse': typeof ApiAnalyseRoute
   '/api/brief': typeof ApiBriefRoute
+  '/api/build-status': typeof ApiBuildStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/analyse': typeof ApiAnalyseRoute
   '/api/brief': typeof ApiBriefRoute
+  '/api/build-status': typeof ApiBuildStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/analyse' | '/api/brief'
+  fullPaths: '/' | '/api/analyse' | '/api/brief' | '/api/build-status'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/analyse' | '/api/brief'
-  id: '__root__' | '/' | '/api/analyse' | '/api/brief'
+  to: '/' | '/api/analyse' | '/api/brief' | '/api/build-status'
+  id: '__root__' | '/' | '/api/analyse' | '/api/brief' | '/api/build-status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiAnalyseRoute: typeof ApiAnalyseRoute
   ApiBriefRoute: typeof ApiBriefRoute
+  ApiBuildStatusRoute: typeof ApiBuildStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBriefRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/build-status': {
+      id: '/api/build-status'
+      path: '/api/build-status'
+      fullPath: '/api/build-status'
+      preLoaderRoute: typeof ApiBuildStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiAnalyseRoute: ApiAnalyseRoute,
   ApiBriefRoute: ApiBriefRoute,
+  ApiBuildStatusRoute: ApiBuildStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

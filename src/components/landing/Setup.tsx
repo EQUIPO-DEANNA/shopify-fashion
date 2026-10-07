@@ -1,57 +1,64 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { CTA, Eyebrow, Reveal, Section } from "./primitives";
 import { parseScenes, MAX_SCENES, type Brand, type FieldError } from "@/lib/intake/brief";
 import type { StoreAnalysis } from "@/lib/intake/analyse";
+import { useT } from "@/lib/i18n";
 
 export function ThreeThings() {
+  const t = useT();
+
   return (
     <Section tone="background">
       <Reveal>
-        <Eyebrow>What we need from the brand</Eyebrow>
-        <h2 className="display-lg mt-6">Give us three things.</h2>
+        <Eyebrow>{t("Lo que necesitamos de la marca")}</Eyebrow>
+        <h2 className="display-lg mt-6">{t("Tres cosas.")}</h2>
       </Reveal>
 
       <div className="mt-16 grid gap-6 lg:grid-cols-3">
         <Reveal className="border border-border bg-card p-10">
           <p className="font-display text-5xl font-extrabold text-muted-foreground/40">01</p>
-          <h3 className="display-md mt-6">Your shop&apos;s address</h3>
+          <h3 className="display-md mt-6">{t("La dirección de tu tienda")}</h3>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            That is the whole catalogue step. We read your public Shopify feed — products, photos,
-            prices — live, every time. Nothing to upload, nothing to keep in sync.
+            {t(
+              "Y ya está el catálogo. Leemos tu feed público de Shopify en directo cada vez: productos, fotos y precios. Nada que subir, nada que mantener sincronizado.",
+            )}
           </p>
           <div className="mt-8 border border-dashed border-border p-5">
-            <p className="font-mono text-xs text-muted-foreground">www.yourbrand.com</p>
+            <p className="font-mono text-xs text-muted-foreground">www.tumarca.com</p>
             <p className="mt-4 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-electric">
-              We store none of it
+              {t("No guardamos nada")}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Your images stay on your CDN. We hold addresses, not files.
+              {t("Tus imágenes se quedan en tu CDN. Guardamos direcciones, no ficheros.")}
             </p>
           </div>
         </Reveal>
 
         <Reveal delay={110} className="border border-border bg-card p-10">
           <p className="font-display text-5xl font-extrabold text-muted-foreground/40">02</p>
-          <h3 className="display-md mt-6">Your brand</h3>
+          <h3 className="display-md mt-6">{t("Tu marca")}</h3>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            A name and a letter for the mark. Colours and type we read off your own storefront, so
-            the experience looks like you and not like us.
+            {t(
+              "Un nombre y una letra para el símbolo. Los colores y la tipografía los sacamos de tu propia web, para que la experiencia se parezca a ti y no a nosotros.",
+            )}
           </p>
           <div className="mt-8 space-y-3">
             {[
-              ["Brand name", "Required"],
-              ["Monogram", "We propose one"],
-              ["Colours", "Read from your site"],
-              ["Type", "Read from your site"],
-              ["Language", "Spanish or English"],
+              ["Nombre de la marca", "Obligatorio"],
+              ["Monograma", "Lo proponemos"],
+              ["Colores", "De tu web"],
+              ["Tipografía", "De tu web"],
+              ["Idioma", "Español o inglés"],
             ].map(([label, note], i) => (
               <div
                 key={label}
                 className="flex items-center justify-between border border-border px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.16em]"
               >
-                {label}
-                <span className={i === 0 ? "text-electric" : "text-muted-foreground"}>{note}</span>
+                {t(label as string)}
+                <span className={i === 0 ? "text-electric" : "text-muted-foreground"}>
+                  {t(note as string)}
+                </span>
               </div>
             ))}
           </div>
@@ -59,42 +66,47 @@ export function ThreeThings() {
 
         <Reveal delay={220} className="border border-border bg-card p-10">
           <p className="font-display text-5xl font-extrabold text-muted-foreground/40">03</p>
-          <h3 className="display-md mt-6">Your host and your world</h3>
+          <h3 className="display-md mt-6">{t("Tu anfitrión y tu mundo")}</h3>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            One line on what you make and where it gets worn, and who wears it. The host is a person
-            we generate — never a real one, unless you send us someone you have the rights to.
+            {t(
+              "Una línea sobre qué haces y dónde se lleva, y quién lo lleva. El anfitrión es una persona que generamos, nunca una real, salvo que nos mandes a alguien cuyos derechos tengas.",
+            )}
           </p>
           <div className="mt-8 space-y-2 text-[0.65rem] font-semibold uppercase tracking-[0.14em]">
-            {["A line about your world", "Who the host is", "Where the scenes happen"].map((s) => (
-              <div key={s} className="flex items-center gap-3">
-                <span className="w-full border border-border px-4 py-3">{s}</span>
-              </div>
-            ))}
+            {["Una línea sobre tu mundo", "Quién es el anfitrión", "Dónde pasan las escenas"].map(
+              (item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <span className="w-full border border-border px-4 py-3">{t(item)}</span>
+                </div>
+              ),
+            )}
           </div>
           <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-            Your Shopify store stays the source of truth for products, pricing and checkout.
+            {t("Tu tienda de Shopify sigue mandando en productos, precios y checkout.")}
           </p>
         </Reveal>
       </div>
 
       <Reveal delay={120}>
         <div className="mt-24 text-center">
-          <h2 className="display-xl">That&apos;s it.</h2>
-          <h3 className="display-md mt-4 text-muted-foreground">We build the experience.</h3>
+          <h2 className="display-xl">{t("Ya está.")}</h2>
+          <h3 className="display-md mt-4 text-muted-foreground">
+            {t("Nosotros construimos la experiencia.")}
+          </h3>
         </div>
       </Reveal>
     </Section>
   );
 }
 
-/* --------------------------------------------------------------- the intake */
+/* --------------------------------------------------------------- el formulario */
 
 const steps = [
-  { n: 1, title: "Your brand" },
-  { n: 2, title: "Your catalogue" },
-  { n: 3, title: "Your host" },
-  { n: 4, title: "Your world" },
-  { n: 5, title: "Your brief" },
+  { n: 1, title: "Tu marca" },
+  { n: 2, title: "Tu catálogo" },
+  { n: 3, title: "Tu anfitrión" },
+  { n: 4, title: "Tu mundo" },
+  { n: 5, title: "Listo" },
 ];
 
 type Form = {
@@ -134,9 +146,10 @@ const FIELD_STEP: Record<string, number> = {
 };
 
 type Handoff = { started: boolean; message: string; url?: string; reason?: string };
-type Submitted = { brand: Brand; filename: string; handoff: Handoff };
+type Submitted = { brand: Brand; handoff: Handoff };
 
 export function Wizard() {
+  const t = useT();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<Form>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -166,7 +179,10 @@ export function Wizard() {
 
   async function readCatalogue() {
     if (!form.storeUrl.trim()) {
-      setErrors((previous) => ({ ...previous, storeUrl: "We need your shop's address." }));
+      setErrors((previous) => ({
+        ...previous,
+        storeUrl: t("Necesitamos la dirección de tu tienda."),
+      }));
       setStep(1);
       return;
     }
@@ -181,12 +197,12 @@ export function Wizard() {
       });
       const payload = (await response.json()) as StoreAnalysis & { error?: string };
       if (!response.ok) {
-        setAnalysisError(payload.error ?? "We could not read that shop.");
+        setAnalysisError(payload.error ?? t("No hemos podido leer esa tienda."));
         return;
       }
       setAnalysis(payload);
     } catch {
-      setAnalysisError("The connection dropped before we finished reading. Try again.");
+      setAnalysisError(t("Se ha cortado la conexión antes de terminar. Inténtalo otra vez."));
     } finally {
       setAnalysing(false);
     }
@@ -204,7 +220,6 @@ export function Wizard() {
       const payload = (await response.json()) as {
         ok?: boolean;
         brand?: Brand;
-        filename?: string;
         handoff?: Handoff;
         errors?: FieldError[];
         error?: string;
@@ -219,16 +234,14 @@ export function Wizard() {
         return;
       }
       if (!response.ok || !payload.brand || !payload.handoff) {
-        setSubmitError(payload.error ?? "Something went wrong on our end. Try again.");
+        setSubmitError(
+          payload.error ?? t("Algo ha fallado por nuestra parte. Inténtalo otra vez."),
+        );
         return;
       }
-      setSubmitted({
-        brand: payload.brand,
-        filename: payload.filename ?? `${payload.brand.slug}.json`,
-        handoff: payload.handoff,
-      });
+      setSubmitted({ brand: payload.brand, handoff: payload.handoff });
     } catch {
-      setSubmitError("The connection dropped before we finished. Nothing was lost — try again.");
+      setSubmitError(t("Se ha cortado la conexión. No se ha perdido nada, inténtalo otra vez."));
     } finally {
       setSubmitting(false);
     }
@@ -241,143 +254,65 @@ export function Wizard() {
       // is the server's job, and the server is the one that decides.
       if (step === 1) {
         const missing: Record<string, string> = {};
-        if (!form.name.trim()) missing["name"] = "Tell us what the brand is called.";
-        if (!form.storeUrl.trim()) missing["storeUrl"] = "We need your shop's address.";
+        if (!form.name.trim()) missing["name"] = t("Dinos cómo se llama la marca.");
+        if (!form.storeUrl.trim())
+          missing["storeUrl"] = t("Necesitamos la dirección de tu tienda.");
         if (Object.keys(missing).length) {
           setErrors((previous) => ({ ...previous, ...missing }));
           return;
         }
       }
-      setStep((s) => Math.min(5, s + 1));
+      setStep((current) => Math.min(5, current + 1));
       return;
     }
     void submit();
   }
 
-  function download() {
-    if (!submitted) return;
-    const blob = new Blob([`${JSON.stringify(submitted.brand, null, 2)}\n`], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = submitted.filename;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }
-
   if (submitted) {
     return (
-      <Section id="setup" tone="paper">
-        <Reveal>
-          <Eyebrow>{submitted.handoff.started ? "Building now" : "Brief received"}</Eyebrow>
-          <h2 className="display-lg mt-6">
-            {submitted.handoff.started
-              ? `${submitted.brand.name} is being built.`
-              : `${submitted.brand.name} is on its way.`}
-          </h2>
-        </Reveal>
-        <Reveal delay={120} className="mt-12 border border-border bg-card p-8 md:p-12">
-          <p className="text-base leading-relaxed">{submitted.handoff.message}</p>
-
-          {submitted.handoff.started && submitted.handoff.url && (
-            <div className="mt-8 border border-electric/40 bg-electric/5 p-6">
-              <p className="eyebrow text-electric">Your experience will be here</p>
-              <a
-                href={submitted.handoff.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 block break-all font-display text-xl font-bold underline decoration-electric underline-offset-4"
-              >
-                {submitted.handoff.url}
-              </a>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                It takes a few minutes. The link will not work until it finishes, so give it a
-                moment before you try.
-              </p>
-            </div>
-          )}
-
-          <dl className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-2">
-            {[
-              ["Identifier", submitted.brand.slug],
-              ["Shop", submitted.brand.store.domain],
-              ["Host", submitted.brand.host.name],
-              ["Language", submitted.brand.language === "en" ? "English" : "Spanish"],
-              ["Scenes", String(submitted.brand.scenes.length)],
-            ].map(([label, value]) => (
-              <div key={label} className="bg-card px-6 py-5">
-                <dt className="eyebrow">{label}</dt>
-                <dd className="mt-2 font-display text-lg font-bold">{value}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
-            {submitted.brand.intake.defaults.length > 0 ? (
-              <>
-                We filled in what you left blank:{" "}
-                <span className="text-foreground">
-                  {submitted.brand.intake.defaults.join(", ")}
-                </span>
-                . Change any of it by sending the brief back with a note.{" "}
-              </>
-            ) : null}
-            This brief is everything we hold about you. No images were uploaded and none are kept —
-            your catalogue and any reference link are read live, each time.
-          </p>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            <CTA variant="electric" onClick={download}>
-              Download the brief
-            </CTA>
-            <CTA
-              variant="outline"
-              onClick={() => {
-                setSubmitted(null);
-                setForm(EMPTY);
-                setAnalysis(null);
-                setAnalysisError(null);
-                setStep(1);
-              }}
-            >
-              Submit another brand
-            </CTA>
-          </div>
-        </Reveal>
-      </Section>
+      <Building
+        brand={submitted.brand}
+        handoff={submitted.handoff}
+        onRestart={() => {
+          setSubmitted(null);
+          setForm(EMPTY);
+          setAnalysis(null);
+          setAnalysisError(null);
+          setStep(1);
+        }}
+      />
     );
   }
 
   return (
     <Section id="setup" tone="paper">
       <Reveal>
-        <Eyebrow>Setup</Eyebrow>
-        <h2 className="display-lg mt-6">Build it in five steps.</h2>
+        <Eyebrow>{t("Empezar")}</Eyebrow>
+        <h2 className="display-lg mt-6">{t("Cinco pasos y listo.")}</h2>
         <p className="mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Step two reads your actual shop and tells you what we found. Nothing is uploaded and
-          nothing is stored.
+          {t(
+            "El paso dos lee tu tienda de verdad y te dice lo que hemos encontrado. No se sube nada y no se guarda nada.",
+          )}
         </p>
       </Reveal>
 
       <Reveal delay={120} className="mt-12 border border-border bg-card">
         <div className="flex flex-wrap gap-px border-b border-border bg-border">
-          {steps.map((s) => (
+          {steps.map((item) => (
             <button
-              key={s.n}
+              key={item.n}
               type="button"
-              onClick={() => setStep(s.n)}
+              onClick={() => setStep(item.n)}
               className={cn(
                 "flex-1 bg-card px-4 py-5 text-left transition-colors",
-                step === s.n ? "bg-foreground text-primary-foreground" : "hover:bg-muted",
+                step === item.n ? "bg-foreground text-primary-foreground" : "hover:bg-muted",
               )}
             >
               <span className="text-[0.6rem] font-semibold tracking-[0.24em] opacity-60">
-                STEP {s.n}
+                {t("PASO")} {item.n}
               </span>
               <span className="mt-2 block text-[0.7rem] font-semibold uppercase tracking-[0.14em]">
-                {s.title}
+                {t(item.title)}
               </span>
             </button>
           ))}
@@ -388,35 +323,37 @@ export function Wizard() {
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <Field
-                  label="Brand name"
+                  label={t("Nombre de la marca")}
                   value={form.name}
-                  onChange={(v) => set("name", v)}
+                  onChange={(value) => set("name", value)}
                   placeholder="Casa Marés"
                   error={errors["name"]}
                 />
                 <Field
-                  label="Shop address"
+                  label={t("Dirección de la tienda")}
                   value={form.storeUrl}
-                  onChange={(v) => set("storeUrl", v)}
+                  onChange={(value) => set("storeUrl", value)}
                   placeholder="www.casamares.com"
                   error={errors["storeUrl"]}
-                  hint="Your live storefront, not the Shopify admin."
+                  hint={t("Tu tienda en directo, no el panel de Shopify.")}
                 />
               </div>
               <div className="space-y-6">
                 <Field
-                  label="Monogram"
+                  label={t("Monograma")}
                   value={form.monogram}
-                  onChange={(v) => set("monogram", v.toUpperCase().slice(0, 2))}
+                  onChange={(value) => set("monogram", value.toUpperCase().slice(0, 2))}
                   placeholder={form.name.trim().charAt(0).toUpperCase() || "C"}
-                  hint="One or two letters for the mark and the browser tab. We propose one if you skip it."
+                  hint={t(
+                    "Una o dos letras para el símbolo y la pestaña del navegador. Si lo dejas, lo proponemos nosotros.",
+                  )}
                 />
                 <label className="block">
-                  <span className="eyebrow">Language</span>
+                  <span className="eyebrow">{t("Idioma")}</span>
                   <div className="mt-3 flex gap-px border border-border bg-border">
                     {[
-                      ["es", "Spanish"],
-                      ["en", "English"],
+                      ["es", "Español"],
+                      ["en", "Inglés"],
                     ].map(([value, label]) => (
                       <button
                         key={value}
@@ -429,7 +366,7 @@ export function Wizard() {
                             : "bg-card hover:bg-muted",
                         )}
                       >
-                        {label}
+                        {t(label as string)}
                       </button>
                     ))}
                   </div>
@@ -442,30 +379,36 @@ export function Wizard() {
             <div>
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <p className="eyebrow">Read the catalogue</p>
+                  <p className="eyebrow">{t("Leer el catálogo")}</p>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                    We fetch your public Shopify feed and report what we can put on a person, what
-                    completes a look, and what we could not place. It takes a few seconds.
+                    {t(
+                      "Leemos tu feed público de Shopify y te decimos qué podemos poner sobre una persona, qué completa un look, y qué no hemos sabido colocar. Tarda unos segundos.",
+                    )}
                   </p>
                 </div>
                 <CTA variant="electric" onClick={() => void readCatalogue()} disabled={analysing}>
-                  {analysing ? "Reading…" : analysis ? "Read it again" : "Read my catalogue"}
+                  {analysing
+                    ? t("Leyendo…")
+                    : analysis
+                      ? t("Leerlo otra vez")
+                      : t("Leer mi catálogo")}
                 </CTA>
               </div>
 
               {analysing && (
                 <p className="mt-8 text-sm text-muted-foreground">
-                  Reading {form.storeUrl || "your shop"}…
+                  {t("Leyendo")} {form.storeUrl || t("tu tienda")}…
                 </p>
               )}
 
               {analysisError && (
                 <div className="mt-8 border border-destructive/40 bg-destructive/5 p-6">
-                  <p className="eyebrow text-destructive">We could not read it</p>
+                  <p className="eyebrow text-destructive">{t("No hemos podido leerla")}</p>
                   <p className="mt-3 text-sm leading-relaxed">{analysisError}</p>
                   <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                    You can carry on anyway — a password-protected shop is a normal case, and we
-                    will sort the catalogue out with you by hand.
+                    {t(
+                      "Puedes seguir igualmente: una tienda con contraseña es algo normal y lo resolvemos contigo a mano.",
+                    )}
                   </p>
                 </div>
               )}
@@ -474,7 +417,7 @@ export function Wizard() {
 
               {!analysing && !analysis && !analysisError && (
                 <p className="mt-8 text-sm text-muted-foreground">
-                  Nothing read yet. This is the only step that touches your shop.
+                  {t("Todavía no hemos leído nada. Este es el único paso que toca tu tienda.")}
                 </p>
               )}
             </div>
@@ -484,29 +427,31 @@ export function Wizard() {
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <Field
-                  label="Host name"
+                  label={t("Nombre del anfitrión")}
                   value={form.hostName}
-                  onChange={(v) => set("hostName", v)}
-                  placeholder="We propose one"
-                  hint="The person who wears your clothes through the experience."
+                  onChange={(value) => set("hostName", value)}
+                  placeholder={t("Lo proponemos nosotros")}
+                  hint={t("La persona que lleva tu ropa a lo largo de la experiencia.")}
                 />
                 <Field
-                  label="Reference photo link"
+                  label={t("Enlace a una foto de referencia")}
                   value={form.hostPhotoUrl}
-                  onChange={(v) => set("hostPhotoUrl", v)}
+                  onChange={(value) => set("hostPhotoUrl", value)}
                   placeholder="https://…"
                   error={errors["hostPhotoUrl"]}
-                  hint="Optional, and a link only — we never take a copy. Only send someone you have written permission to use."
+                  hint={t(
+                    "Opcional, y solo un enlace: nunca nos quedamos una copia. Manda únicamente a alguien de quien tengas permiso por escrito.",
+                  )}
                 />
               </div>
               <Field
-                label="Who they are"
+                label={t("Quién es")}
                 value={form.hostBrief}
-                onChange={(v) => set("hostBrief", v)}
-                placeholder="A woman in her early thirties, dark hair, warm and unhurried."
+                onChange={(value) => set("hostBrief", value)}
+                placeholder={t("Una mujer de treinta y pocos, pelo oscuro, cercana y sin prisa.")}
                 textarea
                 rows={7}
-                hint="Leave it blank and we will propose someone for you to approve."
+                hint={t("Déjalo en blanco y te proponemos a alguien para que lo apruebes.")}
               />
             </div>
           )}
@@ -515,43 +460,46 @@ export function Wizard() {
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <Field
-                  label="Your world"
+                  label={t("Tu mundo")}
                   value={form.world}
-                  onChange={(v) => set("world", v)}
-                  placeholder="Linen and cotton shirting for warm evenings on the Mediterranean coast."
+                  onChange={(value) => set("world", value)}
+                  placeholder={t(
+                    "Camisas de lino y algodón para las noches de verano en el Mediterráneo.",
+                  )}
                   textarea
                   rows={4}
                   error={errors["world"]}
-                  hint="One line: what you make, the fabric, and where it gets worn."
+                  hint={t("Una línea: qué haces, con qué tejido, y dónde se lleva.")}
                 />
                 <Field
-                  label="Scenes"
+                  label={t("Escenas")}
                   value={form.scenes}
-                  onChange={(v) => set("scenes", v)}
+                  onChange={(value) => set("scenes", value)}
                   placeholder={
-                    "IN THE CITY | a narrow street at dusk, warm shopfront light\nON THE ROOFTOP | a terrace at golden hour"
+                    "EN LA CIUDAD | una calle estrecha al atardecer, luz cálida de escaparate\n" +
+                    "EN LA AZOTEA | una terraza a la hora dorada"
                   }
                   textarea
                   rows={6}
                   error={errors["scenes"]}
-                  hint={`One idea per line, up to ${MAX_SCENES}. LABEL | description, or just a description.`}
+                  hint={`${t("Una idea por línea, hasta")} ${MAX_SCENES}. ${t("ETIQUETA | descripción, o solo la descripción.")}`}
                 />
               </div>
               <div>
-                <p className="eyebrow">How we read them</p>
+                <p className="eyebrow">{t("Cómo las leemos")}</p>
                 {scenePreview.length === 0 ? (
                   <p className="mt-4 text-sm text-muted-foreground">
-                    Nothing yet. Leave it blank and we will propose scenes from your world.
+                    {t("Nada todavía. Si lo dejas en blanco, proponemos escenas desde tu mundo.")}
                   </p>
                 ) : (
                   <ul className="mt-4 space-y-3">
-                    {scenePreview.map((scene) => (
-                      <li key={scene.id} className="border border-border p-4">
+                    {scenePreview.map((sceneItem) => (
+                      <li key={sceneItem.id} className="border border-border p-4">
                         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-electric">
-                          {scene.label}
+                          {sceneItem.label}
                         </p>
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                          {scene.prompt}
+                          {sceneItem.prompt}
                         </p>
                       </li>
                     ))}
@@ -559,7 +507,7 @@ export function Wizard() {
                 )}
                 {scenePreview.length > MAX_SCENES && (
                   <p className="mt-4 text-sm text-destructive">
-                    That is more than {MAX_SCENES} scenes.
+                    {t("Eso son más de")} {MAX_SCENES} {t("escenas.")}
                   </p>
                 )}
               </div>
@@ -570,12 +518,12 @@ export function Wizard() {
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <Field
-                  label="Where do we reply"
+                  label={t("Dónde te contestamos")}
                   value={form.contactEmail}
-                  onChange={(v) => set("contactEmail", v)}
-                  placeholder="you@yourbrand.com"
+                  onChange={(value) => set("contactEmail", value)}
+                  placeholder="tu@tumarca.com"
                   error={errors["contactEmail"]}
-                  hint="Optional. Without it we have no way to come back to you."
+                  hint={t("Opcional. Sin esto no tenemos forma de volver a ti.")}
                 />
                 {submitError && <p className="text-sm text-destructive">{submitError}</p>}
               </div>
@@ -586,13 +534,17 @@ export function Wizard() {
           <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
             <button
               type="button"
-              onClick={() => setStep((s) => Math.max(1, s - 1))}
+              onClick={() => setStep((current) => Math.max(1, current - 1))}
               className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              ← Back
+              ← {t("Atrás")}
             </button>
             <CTA type="submit" variant={step === 5 ? "electric" : "solid"} disabled={submitting}>
-              {step === 5 ? (submitting ? "Sending…" : "Create my experience →") : "Next →"}
+              {step === 5
+                ? submitting
+                  ? t("Enviando…")
+                  : `${t("Crear mi experiencia")} →`
+                : `${t("Siguiente")} →`}
             </CTA>
           </div>
         </form>
@@ -601,19 +553,259 @@ export function Wizard() {
   );
 }
 
-/* ------------------------------------------------------------- the report */
+/* ------------------------------------------------------- mientras se construye */
+
+type BuildState = "building" | "done" | "failed" | "unknown";
+type Status = { state: BuildState; url?: string; run?: string; minutes?: number };
+
+/** What the factory is doing, in the order it does it. */
+const PHASES = [
+  "Leyendo tu catálogo",
+  "Cogiendo los colores y la tipografía de tu web",
+  "Generando la fotografía",
+  "Montando el sitio",
+  "Publicándolo",
+];
+
+/**
+ * The page a brand waits on.
+ *
+ * It shows elapsed time and the real list of what the factory does, and it does
+ * NOT pretend to know which of those it is on. The workflow reports one bit —
+ * running, or finished — so a per-step progress bar here would be invented.
+ * Sitting with a spinner for eight minutes is tolerable; being lied to about
+ * minute six is not.
+ */
+function Building({
+  brand,
+  handoff,
+  onRestart,
+}: {
+  brand: Brand;
+  handoff: Handoff;
+  onRestart: () => void;
+}) {
+  const t = useT();
+  const [status, setStatus] = useState<Status>({
+    state: handoff.started ? "building" : "unknown",
+  });
+  const [elapsed, setElapsed] = useState(0);
+  const startedAt = useRef(Date.now());
+
+  // A clock of our own, so the page is never frozen between polls.
+  useEffect(() => {
+    if (!handoff.started) return;
+    const tick = setInterval(
+      () => setElapsed(Math.floor((Date.now() - startedAt.current) / 1000)),
+      1000,
+    );
+    return () => clearInterval(tick);
+  }, [handoff.started]);
+
+  useEffect(() => {
+    if (!handoff.started) return;
+    let alive = true;
+
+    async function poll() {
+      try {
+        const response = await fetch(`/api/build-status?slug=${encodeURIComponent(brand.slug)}`);
+        if (!response.ok) return;
+        const next = (await response.json()) as Status;
+        if (!alive) return;
+        // "unknown" early on means the run has not appeared in the API yet.
+        // Treating that as a failure would flash an error at every brand in
+        // the first few seconds of a build that is going perfectly well.
+        if (next.state === "unknown") return;
+        setStatus(next);
+      } catch {
+        // A dropped poll is not news. The next one is in five seconds.
+      }
+    }
+
+    void poll();
+    const timer = setInterval(() => void poll(), 5000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [brand.slug, handoff.started]);
+
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+
+  // Nothing was started: no build to watch, so say what will happen instead.
+  if (!handoff.started) {
+    return (
+      <Section id="setup" tone="paper">
+        <Reveal>
+          <Eyebrow>{t("Ficha recibida")}</Eyebrow>
+          <h2 className="display-lg mt-6">
+            {brand.name} {t("está en camino.")}
+          </h2>
+        </Reveal>
+        <Reveal delay={120} className="mt-12 border border-border bg-card p-8 md:p-12">
+          <p className="text-base leading-relaxed">{handoff.message}</p>
+          <BrandFacts brand={brand} />
+          <StorageNote brand={brand} />
+          <div className="mt-10">
+            <CTA variant="outline" onClick={onRestart}>
+              {t("Enviar otra marca")}
+            </CTA>
+          </div>
+        </Reveal>
+      </Section>
+    );
+  }
+
+  return (
+    <Section id="setup" tone="paper">
+      <Reveal>
+        <Eyebrow>
+          {status.state === "done"
+            ? t("Lista")
+            : status.state === "failed"
+              ? t("Se ha parado")
+              : t("Construyendo")}
+        </Eyebrow>
+        <h2 className="display-lg mt-6">
+          {status.state === "done"
+            ? `${brand.name} ${t("ya está en marcha.")}`
+            : status.state === "failed"
+              ? `${brand.name} ${t("no ha llegado a publicarse.")}`
+              : `${t("Estamos construyendo")} ${brand.name}.`}
+        </h2>
+      </Reveal>
+
+      <Reveal delay={120} className="mt-12 border border-border bg-card p-8 md:p-12">
+        {status.state === "done" && status.url ? (
+          <div>
+            <p className="text-base leading-relaxed">
+              {t("Ya puedes abrirla. Pruébate tu propia ropa.")}
+            </p>
+            <a
+              href={status.url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 block break-all border border-electric bg-electric/5 p-8 font-display text-2xl font-bold underline decoration-electric underline-offset-4 md:text-3xl"
+            >
+              {status.url}
+            </a>
+          </div>
+        ) : status.state === "failed" ? (
+          <div>
+            <p className="text-base leading-relaxed">
+              {t(
+                "Algo se ha torcido durante la construcción. Ya lo sabemos y alguien lo está mirando; no hace falta que vuelvas a enviar nada.",
+              )}
+            </p>
+            {brand.intake.contactEmail ? (
+              <p className="mt-4 text-sm text-muted-foreground">
+                {t("Te escribimos a")} {brand.intake.contactEmail}.
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <p className="text-base leading-relaxed">
+                {t("Tarda unos diez minutos. Puedes dejar esta página abierta.")}
+              </p>
+              <p className="font-display text-3xl font-extrabold tabular-nums">
+                {minutes}:{String(seconds).padStart(2, "0")}
+              </p>
+            </div>
+
+            <ul className="mt-10 space-y-px border border-border bg-border">
+              {PHASES.map((phase) => (
+                <li
+                  key={phase}
+                  className="flex items-center gap-4 bg-card px-6 py-5 text-sm text-muted-foreground"
+                >
+                  <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-electric" />
+                  {t(phase)}
+                </li>
+              ))}
+            </ul>
+
+            <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
+              {t(
+                "No te decimos por cuál va porque no lo sabemos: la máquina avisa cuando termina, no paso a paso. Preferimos no inventarnos una barra de progreso.",
+              )}
+            </p>
+          </div>
+        )}
+
+        <BrandFacts brand={brand} />
+        <StorageNote brand={brand} />
+
+        <div className="mt-10 flex flex-wrap gap-3">
+          {status.state === "done" && status.url && (
+            <CTA variant="electric" href={status.url}>
+              {t("Abrir mi experiencia")} →
+            </CTA>
+          )}
+          <CTA variant="outline" onClick={onRestart}>
+            {t("Enviar otra marca")}
+          </CTA>
+        </div>
+      </Reveal>
+    </Section>
+  );
+}
+
+function BrandFacts({ brand }: { brand: Brand }) {
+  const t = useT();
+
+  return (
+    <dl className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-2">
+      {[
+        [t("Identificador"), brand.slug],
+        [t("Tienda"), brand.store.domain],
+        [t("Anfitrión"), brand.host.name],
+        [t("Idioma"), brand.language === "en" ? t("Inglés") : t("Español")],
+        [t("Escenas"), String(brand.scenes.length)],
+      ].map(([label, value]) => (
+        <div key={label} className="bg-card px-6 py-5">
+          <dt className="eyebrow">{label}</dt>
+          <dd className="mt-2 font-display text-lg font-bold">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function StorageNote({ brand }: { brand: Brand }) {
+  const t = useT();
+
+  return (
+    <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
+      {brand.intake.defaults.length > 0 ? (
+        <>
+          {t("Hemos rellenado lo que dejaste en blanco:")}{" "}
+          <span className="text-foreground">{brand.intake.defaults.join(", ")}</span>.{" "}
+        </>
+      ) : null}
+      {t(
+        "No se ha subido ninguna imagen y no guardamos ninguna: tu catálogo y cualquier enlace de referencia se leen en directo, cada vez.",
+      )}
+    </p>
+  );
+}
+
+/* ------------------------------------------------------------------ el informe */
 
 function AnalysisReport({ analysis }: { analysis: StoreAnalysis }) {
+  const t = useT();
   const [showWarnings, setShowWarnings] = useState(false);
 
   return (
     <div className="mt-8 space-y-8">
       <dl className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
         {[
-          ["Products read", analysis.counts.total],
-          ["Can be worn", analysis.counts.tryable],
-          ["Complete a look", analysis.counts.mapped - analysis.counts.tryable],
-          ["We could not place", analysis.counts.unclassified],
+          [t("Productos leídos"), analysis.counts.total],
+          [t("Se pueden llevar"), analysis.counts.tryable],
+          [t("Completan un look"), analysis.counts.mapped - analysis.counts.tryable],
+          [t("No hemos sabido colocar"), analysis.counts.unclassified],
         ].map(([label, value]) => (
           <div key={String(label)} className="bg-card px-6 py-5">
             <dt className="eyebrow">{label}</dt>
@@ -624,17 +816,19 @@ function AnalysisReport({ analysis }: { analysis: StoreAnalysis }) {
 
       {analysis.truncated && (
         <p className="text-xs leading-relaxed text-muted-foreground">
-          This was a partial read, kept short so the page stays responsive. The whole catalogue is
-          read again, with no time limit, when the experience is built.
+          {t(
+            "Esto ha sido una lectura parcial, corta a propósito para que la página no se quede colgada. El catálogo entero se lee otra vez, sin límite de tiempo, cuando se construye la experiencia.",
+          )}
         </p>
       )}
 
       <div>
-        <p className="eyebrow">Picker tabs we would build</p>
+        <p className="eyebrow">{t("Pestañas que montaríamos")}</p>
         {analysis.families.length === 0 ? (
           <p className="mt-4 text-sm text-destructive">
-            No family has enough products for a tab. We would need to look at this catalogue with
-            you.
+            {t(
+              "Ninguna familia tiene productos suficientes para una pestaña. Habría que mirar este catálogo contigo.",
+            )}
           </p>
         ) : (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -653,7 +847,7 @@ function AnalysisReport({ analysis }: { analysis: StoreAnalysis }) {
 
       <div className="grid gap-8 sm:grid-cols-2">
         <div>
-          <p className="eyebrow">Budget bands from your prices</p>
+          <p className="eyebrow">{t("Tramos de precio, de tus propios precios")}</p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             {analysis.budgets.map((budget) => (
               <li key={budget.label}>{budget.label}</li>
@@ -661,11 +855,13 @@ function AnalysisReport({ analysis }: { analysis: StoreAnalysis }) {
           </ul>
         </div>
         <div>
-          <p className="eyebrow">Price range</p>
+          <p className="eyebrow">{t("Rango de precios")}</p>
           <p className="mt-4 font-display text-2xl font-bold">
-            €{analysis.priceRange.min} – €{analysis.priceRange.max}
+            {analysis.priceRange.min} € – {analysis.priceRange.max} €
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">Median €{analysis.priceRange.median}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("Mediana")} {analysis.priceRange.median} €
+          </p>
         </div>
       </div>
 
@@ -673,10 +869,12 @@ function AnalysisReport({ analysis }: { analysis: StoreAnalysis }) {
         <div className="border border-border p-6">
           <button
             type="button"
-            onClick={() => setShowWarnings((v) => !v)}
+            onClick={() => setShowWarnings((value) => !value)}
             className="flex w-full items-center justify-between text-left"
           >
-            <span className="eyebrow">{analysis.warnings.length} thing(s) worth a look</span>
+            <span className="eyebrow">
+              {analysis.warnings.length} {t("cosas que conviene mirar")}
+            </span>
             <span className="text-muted-foreground">{showWarnings ? "−" : "+"}</span>
           </button>
           {showWarnings && (
@@ -703,18 +901,24 @@ function Summary({
   analysis: StoreAnalysis | null;
   scenes: number;
 }) {
+  const t = useT();
   const rows: [string, ReactNode][] = [
-    ["Brand", form.name || "—"],
-    ["Shop", form.storeUrl || "—"],
-    ["Language", form.language === "en" ? "English" : "Spanish"],
-    ["Host", form.hostName || "we propose one"],
-    ["Scenes", scenes === 0 ? "we propose them" : String(scenes)],
-    ["Catalogue", analysis ? `${analysis.counts.tryable} garments you can wear` : "not read yet"],
+    [t("Marca"), form.name || "—"],
+    [t("Tienda"), form.storeUrl || "—"],
+    [t("Idioma"), form.language === "en" ? t("Inglés") : t("Español")],
+    [t("Anfitrión"), form.hostName || t("lo proponemos")],
+    [t("Escenas"), scenes === 0 ? t("las proponemos") : String(scenes)],
+    [
+      t("Catálogo"),
+      analysis
+        ? `${analysis.counts.tryable} ${t("prendas que se pueden llevar")}`
+        : t("sin leer todavía"),
+    ],
   ];
 
   return (
     <div className="border border-border p-6">
-      <p className="eyebrow">What we are about to build</p>
+      <p className="eyebrow">{t("Lo que vamos a construir")}</p>
       <dl className="mt-5 space-y-4">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-baseline justify-between gap-6">
@@ -726,13 +930,15 @@ function Summary({
         ))}
       </dl>
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Submitting sends us this brief and nothing else. No images are uploaded and none are kept.
+        {t(
+          "Al enviar nos llega esta ficha y nada más. No se sube ninguna imagen y no guardamos ninguna.",
+        )}
       </p>
     </div>
   );
 }
 
-/* -------------------------------------------------------------- the inputs */
+/* ------------------------------------------------------------------ los campos */
 
 function Field({
   label,

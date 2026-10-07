@@ -5,37 +5,40 @@ import influencer from "@/assets/influencer.jpg";
 import productPolo from "@/assets/product-polo.jpg";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export function CoreIdea() {
+  const t = useT();
+
   return (
     <Section tone="background">
       <div className="text-center">
         <Reveal>
-          <h2 className="display-lg">Your Shopify store sells clothes.</h2>
+          <h2 className="display-lg">{t("Tu tienda de Shopify vende ropa.")}</h2>
         </Reveal>
         <Reveal delay={150}>
           <h2 className="display-lg mt-4 text-muted-foreground">
-            We turn them into <span className="text-electric">experiences</span>.
+            {t("Nosotros la convertimos en")}{" "}
+            <span className="text-electric">{t("experiencias")}</span>.
           </h2>
         </Reveal>
       </div>
 
       <div className="mt-20 grid items-stretch gap-8 md:grid-cols-[1fr_auto_1fr]">
         <Reveal className="border border-border bg-card p-8">
-          <Eyebrow>Before</Eyebrow>
+          <Eyebrow>{t("Antes")}</Eyebrow>
           <img
             src={productPolo}
-            alt="Catalog product photo"
+            alt={t("Foto de catálogo")}
             loading="lazy"
             width={912}
             height={1104}
             className="mt-6 h-56 w-full object-cover"
           />
           <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-            <li>Product image</li>
-            <li>Price</li>
-            <li>Size</li>
-            <li>Add to cart</li>
+            {["Foto del producto", "Precio", "Talla", "Añadir al carrito"].map((item) => (
+              <li key={item}>{t(item)}</li>
+            ))}
           </ul>
         </Reveal>
 
@@ -47,28 +50,30 @@ export function CoreIdea() {
           delay={120}
           className="border border-foreground/20 bg-foreground p-8 text-primary-foreground"
         >
-          <p className="eyebrow text-primary-foreground/60">After</p>
+          <p className="eyebrow text-primary-foreground/60">{t("Después")}</p>
           <img
             src={sceneCity}
-            alt="Shopper placed inside an AI-generated fashion scene"
+            alt={t("Cliente dentro de una escena generada con IA")}
             loading="lazy"
             width={1024}
             height={1280}
             className="mt-6 h-56 w-full object-cover"
           />
           <ul className="mt-6 grid grid-cols-2 gap-2 text-sm">
-            {["See it", "Wear it", "Style it", "Create with it", "Share it", "Buy it"].map((t) => (
-              <li key={t}>{t}</li>
-            ))}
+            {["Verla", "Ponértela", "Combinarla", "Crear con ella", "Compartirla", "Comprarla"].map(
+              (item) => (
+                <li key={item}>{t(item)}</li>
+              ),
+            )}
           </ul>
         </Reveal>
       </div>
 
       <Reveal delay={120}>
         <p className="mx-auto mt-16 max-w-2xl text-center text-lg leading-relaxed text-muted-foreground">
-          Traditional ecommerce asks customers to imagine themselves wearing your clothes.
+          {t("El ecommerce de siempre le pide al cliente que se imagine con tu ropa.")}
           <br />
-          <span className="text-foreground">AI lets them actually see it.</span>
+          <span className="text-foreground">{t("La IA deja que se vea de verdad.")}</span>
         </p>
       </Reveal>
     </Section>
@@ -78,19 +83,19 @@ export function CoreIdea() {
 const scenes = [
   "Ibiza",
   "Madrid",
-  "Beach Club",
-  "Golf Course",
-  "City",
-  "Luxury Hotel",
-  "Ski Resort",
+  "Club de playa",
+  "Campo de golf",
+  "Ciudad",
+  "Hotel de lujo",
+  "Estación de esquí",
 ];
 
 const influencerScenes = [
-  "At the beach with our ambassador",
-  "At a party",
-  "Playing golf",
-  "Walking through Madrid",
-  "Front row at Fashion Week",
+  "En la playa con nuestro embajador",
+  "En una fiesta",
+  "Jugando al golf",
+  "Paseando por Madrid",
+  "En primera fila en la Fashion Week",
 ];
 
 function CardShell({
@@ -108,6 +113,8 @@ function CardShell({
   cta?: string;
   tone?: "card" | "ink";
 }) {
+  const t = useT();
+
   return (
     <Reveal
       className={cn(
@@ -123,24 +130,24 @@ function CardShell({
           tone === "ink" ? "text-ink-foreground/50" : "text-muted-foreground",
         )}
       >
-        CARD {index}
+        {t("EXPERIENCIA")} {index}
       </p>
-      <h3 className="display-md mt-4">{title}</h3>
+      <h3 className="display-md mt-4">{t(title)}</h3>
       <div
         className={cn(
           "mt-4 space-y-1 text-sm leading-relaxed",
           tone === "ink" ? "text-ink-foreground/70" : "text-muted-foreground",
         )}
       >
-        {lines.map((l) => (
-          <p key={l}>{l}</p>
+        {lines.map((line) => (
+          <p key={line}>{t(line)}</p>
         ))}
       </div>
       <div className="mt-8 flex-1">{children}</div>
       {cta && (
         <div className="mt-8">
           <CTA variant={tone === "ink" ? "ghost-light" : "outline"} href="#setup">
-            {cta}
+            {t(cta)}
           </CTA>
         </div>
       )}
@@ -150,12 +157,14 @@ function CardShell({
 
 function TryOnVisual() {
   const [on, setOn] = useState(false);
+  const t = useT();
+
   return (
     <div>
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <img
           src={heroModel}
-          alt="Shopper photo before try-on"
+          alt={t("Foto del cliente antes del probador")}
           loading="lazy"
           width={1024}
           height={1408}
@@ -169,7 +178,7 @@ function TryOnVisual() {
         <div className="relative h-48 w-full overflow-hidden bg-muted">
           <img
             src={sceneCity}
-            alt="Shopper wearing the garment"
+            alt={t("El cliente con la prenda puesta")}
             loading="lazy"
             width={1024}
             height={1280}
@@ -183,10 +192,10 @@ function TryOnVisual() {
       </div>
       <button
         type="button"
-        onClick={() => setOn((v) => !v)}
+        onClick={() => setOn((value) => !value)}
         className="mt-4 w-full border border-electric/40 bg-electric/10 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-electric transition-colors hover:bg-electric/20"
       >
-        {on ? "Reset" : "Run AI try-on"}
+        {on ? t("Reiniciar") : t("Probar con IA")}
       </button>
     </div>
   );
@@ -194,42 +203,43 @@ function TryOnVisual() {
 
 export function SixExperiences() {
   const [scene, setScene] = useState(0);
+  const t = useT();
 
   return (
     <Section id="experiences" tone="paper">
       <Reveal>
-        <Eyebrow>The experience layer</Eyebrow>
+        <Eyebrow>{t("La capa de experiencia")}</Eyebrow>
         <h2 className="display-lg mt-6">
-          One product.
+          {t("Un producto.")}
           <br />
-          Six experiences.
+          {t("Seis experiencias.")}
         </h2>
       </Reveal>
 
       <div className="mt-16 grid gap-6 lg:grid-cols-2">
         <CardShell
           index="01"
-          title="Try it on"
-          lines={["Upload a photo.", "Choose a product.", "See yourself wearing it."]}
-          cta="Try this experience →"
+          title="Pruébatelo"
+          lines={["Sube una foto.", "Elige una prenda.", "Mírate con ella puesta."]}
+          cta="Probar esta experiencia →"
         >
           <TryOnVisual />
         </CardShell>
 
         <CardShell
           index="02"
-          title="Complete my look"
+          title="Completa tu look"
           lines={[
-            "Don't stop at one garment.",
-            "Let AI combine products from the store into complete outfits.",
+            "No te quedes en una prenda.",
+            "Deja que la IA combine prendas de la tienda en looks completos.",
           ]}
-          cta="Create a look →"
+          cta="Crear un look →"
         >
           <div className="flex flex-wrap items-center gap-2">
-            {["Polo", "Trousers", "Jacket", "Shoes"].map((p, i) => (
-              <span key={p} className="flex items-center gap-2">
+            {["Polo", "Pantalón", "Chaqueta", "Zapatos"].map((piece, i) => (
+              <span key={piece} className="flex items-center gap-2">
                 <span className="border border-border px-3 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em]">
-                  {p}
+                  {t(piece)}
                 </span>
                 {i < 3 && <span className="text-muted-foreground">+</span>}
               </span>
@@ -237,14 +247,14 @@ export function SixExperiences() {
           </div>
           <div className="mt-6 flex items-center gap-4">
             <span className="font-display text-2xl text-electric">↓</span>
-            <span className="display-md">Your look</span>
+            <span className="display-md">{t("Tu look")}</span>
           </div>
           <div className="mt-6 grid grid-cols-4 gap-2">
             {[heroModel, sceneCity, influencer, heroModel].map((src, i) => (
               <img
                 key={i}
                 src={src}
-                alt="Outfit component"
+                alt={t("Prenda del look")}
                 loading="lazy"
                 className="h-24 w-full object-cover"
               />
@@ -254,14 +264,14 @@ export function SixExperiences() {
 
         <CardShell
           index="03"
-          title="Step into the brand"
-          lines={["Don't just wear the clothing.", "Enter the world of the brand."]}
-          cta="Create my scene →"
+          title="Entra en la marca"
+          lines={["No solo lleves la ropa.", "Entra en el mundo de la marca."]}
+          cta="Crear mi escena →"
         >
           <div className="flex flex-wrap gap-2">
-            {scenes.map((s, i) => (
+            {scenes.map((name, i) => (
               <button
-                key={s}
+                key={name}
                 type="button"
                 onClick={() => setScene(i)}
                 className={cn(
@@ -271,20 +281,21 @@ export function SixExperiences() {
                     : "border-border hover:border-foreground/40",
                 )}
               >
-                {s}
+                {t(name)}
               </button>
             ))}
           </div>
           <div className="mt-6 flex items-center gap-3 border border-border bg-background p-4">
             <span className="text-electric">✦</span>
             <p className="text-sm text-muted-foreground">
-              &ldquo;Put me in <span className="text-foreground">{scenes[scene]}</span>&rdquo; — AI
-              generates the shopper wearing the selected clothing there.
+              &laquo;{t("Ponme en")}{" "}
+              <span className="text-foreground">{t(scenes[scene] ?? "")}</span>&raquo; —{" "}
+              {t("la IA genera al cliente allí, con la ropa que ha elegido.")}
             </p>
           </div>
           <img
             src={influencer}
-            alt="Aspirational AI generated scene"
+            alt={t("Escena generada con IA")}
             loading="lazy"
             width={1408}
             height={1024}
@@ -294,53 +305,54 @@ export function SixExperiences() {
 
         <CardShell
           index="04"
-          title="Meet your influencer"
+          title="Conoce a tu embajador"
           tone="ink"
-          lines={[
-            "Your influencer isn't just in the campaign anymore.",
-            "The customer can join them.",
-          ]}
-          cta="Create with an influencer →"
+          lines={["Tu embajador ya no está solo en la campaña.", "El cliente puede salir con él."]}
+          cta="Crear con un embajador →"
         >
           <img
             src={influencer}
-            alt="Customer and brand ambassador together in an AI photo"
+            alt={t("Cliente y embajador juntos en una foto con IA")}
             loading="lazy"
             width={1408}
             height={1024}
             className="h-44 w-full object-cover"
           />
           <div className="mt-6 flex flex-wrap items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em]">
-            <span className="border border-ink-foreground/30 px-3 py-2">Customer</span>
+            <span className="border border-ink-foreground/30 px-3 py-2">{t("Cliente")}</span>
             <span>+</span>
-            <span className="border border-ink-foreground/30 px-3 py-2">Influencer</span>
+            <span className="border border-ink-foreground/30 px-3 py-2">{t("Embajador")}</span>
             <span>+</span>
-            <span className="border border-ink-foreground/30 px-3 py-2">Your clothes</span>
+            <span className="border border-ink-foreground/30 px-3 py-2">{t("Tu ropa")}</span>
             <span className="text-electric">↓</span>
-            <span className="bg-electric px-3 py-2 text-electric-foreground">AI photo</span>
+            <span className="bg-electric px-3 py-2 text-electric-foreground">
+              {t("Foto con IA")}
+            </span>
           </div>
           <ul className="mt-6 space-y-1 text-sm text-ink-foreground/70">
-            {influencerScenes.map((s) => (
-              <li key={s}>&ldquo;{s}&rdquo;</li>
+            {influencerScenes.map((line) => (
+              <li key={line}>&laquo;{t(line)}&raquo;</li>
             ))}
           </ul>
           <p className="mt-6 text-[0.65rem] leading-relaxed text-ink-foreground/45">
-            Influencer/ambassador experiences require appropriate image rights and permissions.
+            {t(
+              "Las experiencias con embajadores requieren los derechos de imagen y los permisos correspondientes.",
+            )}
           </p>
         </CardShell>
 
         <CardShell
           index="05"
-          title="Bring it to life"
+          title="Dale vida"
           lines={[
-            "Turn the generated fashion image into video.",
-            "The person walks. The camera moves. Clothes move naturally.",
+            "Convierte la foto generada en vídeo.",
+            "La persona camina. La cámara se mueve. La ropa se mueve de verdad.",
           ]}
         >
           <div className="relative h-52 overflow-hidden">
             <img
               src={sceneCity}
-              alt="Generated look ready to animate"
+              alt={t("Look listo para animar")}
               loading="lazy"
               width={1024}
               height={1280}
@@ -348,15 +360,15 @@ export function SixExperiences() {
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="flex items-center gap-2 border border-card/60 bg-foreground/60 px-5 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-primary-foreground">
-                ▶ Animate
+                ▶ {t("Animar")}
               </span>
             </div>
             <div className="absolute bottom-0 left-0 h-1 w-1/3 bg-electric" />
           </div>
           <div className="mt-6 flex flex-wrap gap-2 text-[0.6rem] font-semibold uppercase tracking-[0.16em]">
-            {["Animate my look", "Create video", "Share"].map((b) => (
-              <span key={b} className="border border-border px-3 py-2">
-                {b}
+            {["Animar mi look", "Crear vídeo", "Compartir"].map((label) => (
+              <span key={label} className="border border-border px-3 py-2">
+                {t(label)}
               </span>
             ))}
           </div>
@@ -364,23 +376,25 @@ export function SixExperiences() {
 
         <CardShell
           index="06"
-          title="Share your look"
+          title="Comparte tu look"
           lines={[
-            "Every customer can become a creator.",
-            "Every look they create can become content that brings another potential customer back to your brand.",
+            "Cada cliente puede ser creador.",
+            "Cada look que cree puede ser contenido que traiga a otro cliente a tu marca.",
           ]}
         >
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {["WhatsApp", "Instagram", "TikTok", "Pinterest", "Facebook", "Copy link"].map((s) => (
-              <span
-                key={s}
-                className="border border-border px-3 py-3 text-center text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition-colors hover:border-electric hover:text-electric"
-              >
-                {s}
-              </span>
-            ))}
+            {["WhatsApp", "Instagram", "TikTok", "Pinterest", "Facebook", "Copiar enlace"].map(
+              (label) => (
+                <span
+                  key={label}
+                  className="border border-border px-3 py-3 text-center text-[0.6rem] font-semibold uppercase tracking-[0.16em] transition-colors hover:border-electric hover:text-electric"
+                >
+                  {t(label)}
+                </span>
+              ),
+            )}
           </div>
-          <p className="display-md mt-8">Every customer can become a creator.</p>
+          <p className="display-md mt-8">{t("Cada cliente puede ser creador.")}</p>
         </CardShell>
       </div>
     </Section>
@@ -388,32 +402,34 @@ export function SixExperiences() {
 }
 
 const hotspots = [
-  { label: "Navy polo", price: "€89", top: "26%", left: "48%" },
-  { label: "White trousers", price: "€110", top: "62%", left: "40%" },
-  { label: "Jacket", price: "€179", top: "38%", left: "22%" },
+  { label: "Polo marino", price: "89 €", top: "26%", left: "48%" },
+  { label: "Pantalón blanco", price: "110 €", top: "62%", left: "40%" },
+  { label: "Chaqueta", price: "179 €", top: "38%", left: "22%" },
 ];
 
 export function ShopTheExperience() {
   const [active, setActive] = useState(0);
+  const t = useT();
+
   return (
     <Section tone="background">
       <div className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <Reveal className="relative">
           <img
             src={sceneCity}
-            alt="Generated look with shoppable hotspots"
+            alt={t("Look generado con prendas comprables")}
             loading="lazy"
             width={1024}
             height={1280}
             className="h-[560px] w-full object-cover"
           />
-          {hotspots.map((h, i) => (
+          {hotspots.map((spot, i) => (
             <button
-              key={h.label}
+              key={spot.label}
               type="button"
               onMouseEnter={() => setActive(i)}
               onClick={() => setActive(i)}
-              style={{ top: h.top, left: h.left }}
+              style={{ top: spot.top, left: spot.left }}
               className={cn(
                 "absolute -translate-x-1/2 -translate-y-1/2 border px-3 py-2 text-left text-[0.6rem] font-semibold uppercase tracking-[0.14em] backdrop-blur-md transition-all",
                 i === active
@@ -421,24 +437,24 @@ export function ShopTheExperience() {
                   : "border-card/70 bg-card/80 text-foreground",
               )}
             >
-              {h.label}
-              <span className="ml-2 opacity-70">{h.price}</span>
+              {t(spot.label)}
+              <span className="ml-2 opacity-70">{spot.price}</span>
             </button>
           ))}
         </Reveal>
 
         <div>
           <Reveal>
-            <Eyebrow>Shop the experience</Eyebrow>
-            <h2 className="display-lg mt-6">We don&apos;t replace your store.</h2>
+            <Eyebrow>{t("Compra desde la experiencia")}</Eyebrow>
+            <h2 className="display-lg mt-6">{t("No sustituimos tu tienda.")}</h2>
             <h3 className="display-md mt-4 text-muted-foreground">
-              We send shoppers to it wanting the product.
+              {t("Te mandamos clientes que ya quieren la prenda.")}
             </h3>
           </Reveal>
           <Reveal delay={120}>
             <div className="mt-10 flex flex-wrap items-center gap-3 text-[0.65rem] font-semibold uppercase tracking-[0.16em]">
-              {["Experience", "Product", "Shopify", "Checkout"].map((s, i) => (
-                <span key={s} className="flex items-center gap-3">
+              {["Experiencia", "Producto", "Shopify", "Checkout"].map((step, i) => (
+                <span key={step} className="flex items-center gap-3">
                   <span
                     className={cn(
                       "border px-4 py-3",
@@ -447,7 +463,7 @@ export function ShopTheExperience() {
                         : "border-border",
                     )}
                   >
-                    {s}
+                    {t(step)}
                   </span>
                   {i < 3 && <span className="text-muted-foreground">→</span>}
                 </span>
@@ -457,11 +473,12 @@ export function ShopTheExperience() {
           <Reveal delay={200}>
             <div className="mt-10">
               <CTA variant="electric" href="#pricing">
-                Buy this look →
+                {t("Comprar este look")} →
               </CTA>
               <p className="mt-4 text-sm text-muted-foreground">
-                Clicking a look opens the matching product on your Shopify store, with your tracking
-                parameters attached.
+                {t(
+                  "Al pulsar un look se abre la prenda en tu tienda de Shopify, con tus parámetros de seguimiento.",
+                )}
               </p>
             </div>
           </Reveal>

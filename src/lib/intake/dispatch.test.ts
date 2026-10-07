@@ -89,7 +89,7 @@ describe("dispatchBuild", () => {
     // somebody's newsletter product.
     expect(handoff.url).toBeUndefined();
     expect(handoff.message).not.toMatch(/vercel\.app/);
-    expect(handoff.message).toMatch(/send you the address/);
+    expect(handoff.message).toMatch(/Estamos construyendo/);
   });
 
   it("sends the brief itself, under the event the workflow listens for", async () => {
@@ -181,8 +181,11 @@ describe("dispatchBuild", () => {
     const handoff = await dispatchBuild(BRAND);
 
     // Never throws: a brief that reached us is not lost because GitHub was down.
+    // It lands on the capacity path rather than the dispatch one, because an
+    // unreachable GitHub means the day's builds cannot be counted, and an
+    // uncountable budget is not a budget.
     expect(handoff.started).toBe(false);
-    expect(handoff.message).toMatch(/Nothing is lost/);
+    expect(handoff.message).toMatch(/No se pierde nada/);
   });
 
   it("never promises a build it did not start", async () => {

@@ -1,7 +1,10 @@
 import { CTA, Eyebrow, Reveal } from "./primitives";
 import { PhoneDemo } from "./PhoneDemo";
+import { useT } from "@/lib/i18n";
 
 export function Hero() {
+  const t = useT();
+
   return (
     <section
       id="top"
@@ -10,33 +13,33 @@ export function Hero() {
       <div className="mx-auto grid w-full max-w-[1280px] items-center gap-16 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <Reveal>
-            <Eyebrow>For fashion brands on Shopify</Eyebrow>
+            <Eyebrow>{t("Para marcas de moda en Shopify")}</Eyebrow>
           </Reveal>
           <Reveal delay={80}>
             <h1 className="display-xl mt-6">
-              Don&apos;t just show
+              {t("No enseñes")}
               <br />
-              your clothes.
+              {t("tu ropa.")}
               <br />
-              <span className="text-muted-foreground">Let people wear them.</span>
+              <span className="text-muted-foreground">{t("Deja que se la prueben.")}</span>
             </h1>
           </Reveal>
           <Reveal delay={160}>
             <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Turn your Shopify catalog into an interactive AI fashion experience where shoppers can
-              try on your clothes, create looks, make photos and videos, interact with your
-              influencers — and then buy directly from your existing Shopify store.
+              {t(
+                "Convierte tu catálogo de Shopify en una experiencia de moda con IA donde cualquiera puede probarse tu ropa, crear looks, hacerse fotos y vídeos, hablar con tu anfitrión, y comprar después en tu tienda de siempre.",
+              )}
             </p>
           </Reveal>
           <Reveal delay={240}>
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <CTA href="#setup">Create my experience →</CTA>
-              <CTA variant="outline" href="#experiences">
-                See live experience
+              <CTA href="#setup">{t("Crea tu experiencia")} →</CTA>
+              <CTA variant="outline" href="#examples">
+                {t("Ver un ejemplo real")}
               </CTA>
             </div>
             <p className="mt-5 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              From $200/month · No Shopify rebuild required
+              {t("Desde 200 € al mes · Sin tocar tu Shopify")}
             </p>
           </Reveal>
         </div>
@@ -51,16 +54,16 @@ export function Hero() {
           {Array.from({ length: 2 }).map((_, k) => (
             <span key={k} className="flex gap-10">
               {[
-                "Virtual try-on",
-                "Complete my look",
-                "AI scenes",
-                "Influencer photos",
-                "Animated looks",
-                "Shareable content",
-                "Shopify checkout",
-              ].map((t) => (
-                <span key={t} className="flex items-center gap-10">
-                  {t} <span className="text-electric">✦</span>
+                "Probador virtual",
+                "Completa tu look",
+                "Escenas con IA",
+                "Fotos con tu anfitrión",
+                "Looks animados",
+                "Contenido para compartir",
+                "Checkout en Shopify",
+              ].map((item) => (
+                <span key={item} className="flex items-center gap-10">
+                  {t(item)} <span className="text-electric">✦</span>
                 </span>
               ))}
             </span>
