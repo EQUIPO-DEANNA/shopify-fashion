@@ -48,7 +48,7 @@ export type Handoff = {
   /** Where the experience will live, once it is built. */
   url?: string;
   /** The reason we did not start, for our logs rather than for the brand. */
-  reason?: "NOT_CONFIGURED" | "ALREADY_EXISTS" | "AT_CAPACITY" | "DISPATCH_FAILED";
+  reason?: "NOT_CONFIGURED" | "ALREADY_EXISTS" | "AT_CAPACITY" | "CANNOT_COUNT" | "DISPATCH_FAILED";
 };
 
 function token(): string | null {
@@ -91,16 +91,25 @@ async function gh(path: string, init: RequestInit = {}, timeoutMs = 10_000): Pro
 }
 
 /**
- * Has this brand already been built?
+ * Has this brand already been published?
  *
  * Resubmitting the same shop is the cheapest way to spend our money twice, and
  * it is also what an impatient person does when nothing has appeared yet. Both
  * are answered by refusing to build over an experience that already exists and
  * handing it to a human instead, who can decide whether a rebuild is wanted.
+ *
+ * Asks the factory's deployment record rather than looking for the brand's own
+ * repository. The first version did the latter and the guard was silently dead:
+ * a token scoped to brand-factory — which is the correct, narrow scope for a
+ * token living in a public web app — gets 404 for every other repo in the org,
+ * so every brand looked new. It answered "no" by lacking permission to say yes.
+ *
+ * The record is also the better question. A repo can exist from a build that
+ * never published; `deployments/<slug>.json` only exists when a site went live.
  */
 async function alreadyBuilt(slug: string): Promise<boolean> {
   try {
-    const res = await gh(`/repos/EQUIPO-DEANNA/${slug}`);
+    const res = await gh(`/repos/${FACTORY_REPO}/contents/deployments/${slug}.json?ref=main`);
     return res.status === 200;
   } catch {
     // Unreachable GitHub is handled by the dispatch itself; do not block here.
@@ -122,10 +131,21 @@ async function buildsToday(): Promise<number | null> {
     const res = await gh(
       `/repos/${FACTORY_REPO}/actions/workflows/${WORKFLOW}/runs?created=%3E%3D${today}&per_page=1`,
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // 403 here is almost always the token lacking "Actions: read" rather than
+      // anything being wrong. Worth naming, because the symptom is a permanent
+      // outage wearing the costume of a daily limit: every brand is told we are
+      // busy today, every day, forever.
+      console.error(
+        `[dispatch] could not count today's builds: GitHub returned ${res.status}. ` +
+          "GITHUB_FACTORY_TOKEN needs Actions: read on brand-factory.",
+      );
+      return null;
+    }
     const body = (await res.json()) as { total_count?: unknown };
     return typeof body.total_count === "number" ? body.total_count : null;
-  } catch {
+  } catch (error) {
+    console.error(`[dispatch] could not count today's builds: ${(error as Error).message}`);
     return null;
   }
 }
@@ -158,12 +178,12 @@ export async function dispatchBuild(brand: Brand): Promise<Handoff> {
 
   const today = await buildsToday();
   if (today === null || today >= maxBuildsPerDay()) {
-    console.error(
-      `[dispatch] not starting a build (${today === null ? "could not count today's builds" : `${today} already today`})`,
-    );
+    // Two different faults wearing one face. A real cap is a Tuesday; an
+    // uncountable one is a broken token, and telling them apart in the logs is
+    // the difference between waiting a day and fixing a permission.
     return {
       started: false,
-      reason: "AT_CAPACITY",
+      reason: today === null ? "CANNOT_COUNT" : "AT_CAPACITY",
       message:
         "Tenemos tu ficha. Construimos un número limitado de experiencias al día y las de hoy ya " +
         "están cogidas, así que la tuya pasa a una persona en vez de a una cola. No se pierde nada.",

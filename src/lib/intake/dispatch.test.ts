@@ -59,7 +59,8 @@ function stubGitHub({
     if (url.includes("/actions/workflows/")) {
       return new Response(JSON.stringify({ total_count: runsToday }), { status: runsStatus });
     }
-    // The "has this brand already got one" check.
+    // The "has this brand already been published" check, which reads the
+    // factory's own deployment record rather than looking for another repo.
     return new Response(repoExists ? "{}" : "", { status: repoExists ? 200 : 404 });
   });
   vi.stubGlobal("fetch", mock);
@@ -156,8 +157,27 @@ describe("dispatchBuild", () => {
     const handoff = await dispatchBuild(BRAND);
 
     expect(handoff.started).toBe(false);
-    expect(handoff.reason).toBe("AT_CAPACITY");
     expect(gh.dispatched()).toBe(false);
+    // Reported apart from a real cap: one is a Tuesday, the other is a broken
+    // token, and they look identical to the brand but not to us. A token
+    // missing Actions:read told every brand we were busy, every day.
+    expect(handoff.reason).toBe("CANNOT_COUNT");
+  });
+
+  it("calls a genuine cap a cap", async () => {
+    stubGitHub({ runsToday: 99 });
+    expect((await dispatchBuild(BRAND)).reason).toBe("AT_CAPACITY");
+  });
+
+  it("checks the factory's deployment record, not the brand's own repo", async () => {
+    // A token scoped to brand-factory gets 404 for every other repo in the org,
+    // so a guard that looked for `EQUIPO-DEANNA/<slug>` answered "new brand"
+    // for everyone by lacking permission to say otherwise.
+    const gh = stubGitHub({ repoExists: true });
+    await dispatchBuild(BRAND);
+
+    const lookup = gh.calls.find((call) => call.url.includes("/contents/"));
+    expect(lookup?.url).toContain("brand-factory/contents/deployments/casa-mares.json");
   });
 
   it("does not claim a build when GitHub rejects the dispatch", async () => {
