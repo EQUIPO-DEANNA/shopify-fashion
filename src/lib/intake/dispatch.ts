@@ -40,6 +40,16 @@ function maxBuildsPerDay(): number {
 
 const GITHUB_API = "https://api.github.com";
 
+/**
+ * How long a build may run before the waiting page calls it failed.
+ *
+ * A real build takes eight to twelve minutes. This is inferred rather than
+ * read, because the run's own verdict lives behind a permission this token does
+ * not have, so it is set generously: telling a brand it failed while the build
+ * is still going is worse than a clock that runs a few minutes long.
+ */
+const STALE_AFTER_MINUTES = 30;
+
 export type Handoff = {
   /** Did the factory take it and start building? */
   started: boolean;
@@ -128,22 +138,36 @@ async function alreadyBuilt(slug: string): Promise<boolean> {
 async function buildsToday(): Promise<number | null> {
   const today = new Date().toISOString().slice(0, 10);
   try {
-    const res = await gh(
-      `/repos/${FACTORY_REPO}/actions/workflows/${WORKFLOW}/runs?created=%3E%3D${today}&per_page=1`,
-    );
+    // Counted from the markers each run writes into `builds/<date>/`, not from
+    // the Actions API.
+    //
+    // The Actions API needs an `Actions: read` permission on this token, and
+    // that permission could not be granted: the organisation's approval flow
+    // errors and drops the request. A cap that cannot be counted fails closed,
+    // so the whole form sat there telling every brand we were busy — every day,
+    // forever. Counting something `Contents: read` can already see removes the
+    // dependency rather than waiting on an approval that does not come.
+    const res = await gh(`/repos/${FACTORY_REPO}/contents/builds/${today}?ref=main`);
+
+    // No directory for today means no build has started today. That is a zero,
+    // not a failure, and treating it as one would stop the first build of every
+    // morning.
+    if (res.status === 404) return 0;
     if (!res.ok) {
-      // 403 here is almost always the token lacking "Actions: read" rather than
-      // anything being wrong. Worth naming, because the symptom is a permanent
-      // outage wearing the costume of a daily limit: every brand is told we are
-      // busy today, every day, forever.
       console.error(
         `[dispatch] could not count today's builds: GitHub returned ${res.status}. ` +
-          "GITHUB_FACTORY_TOKEN needs Actions: read on brand-factory.",
+          "GITHUB_FACTORY_TOKEN needs Contents: read on brand-factory.",
       );
       return null;
     }
-    const body = (await res.json()) as { total_count?: unknown };
-    return typeof body.total_count === "number" ? body.total_count : null;
+
+    const body = (await res.json()) as unknown;
+    if (!Array.isArray(body)) return null;
+    return body.filter(
+      (entry) =>
+        typeof (entry as { name?: unknown }).name === "string" &&
+        (entry as { name: string }).name.endsWith(".json"),
+    ).length;
   } catch (error) {
     console.error(`[dispatch] could not count today's builds: ${(error as Error).message}`);
     return null;
@@ -280,47 +304,50 @@ export async function buildStatus(slug: string): Promise<BuildStatus> {
   }
 
   try {
-    // Runs are named after the slug — a repository_dispatch hands back no run
-    // id, so the name is the only thread between a submission and its build.
-    const res = await gh(`/repos/${FACTORY_REPO}/actions/workflows/${WORKFLOW}/runs?per_page=20`);
-    if (!res.ok) return { state: "unknown" };
+    // The start marker the run writes before it does anything. Read rather than
+    // the Actions API, which needs a permission this token does not have and
+    // could not be granted — see buildsToday above. Everything here works with
+    // Contents: read alone.
+    const day = new Date().toISOString().slice(0, 10);
+    const marker = await gh(`/repos/${FACTORY_REPO}/contents/builds/${day}/${slug}.json?ref=main`);
 
-    const body = (await res.json()) as {
-      workflow_runs?: {
-        name?: unknown;
-        status?: unknown;
-        conclusion?: unknown;
-        html_url?: unknown;
-        run_started_at?: unknown;
-      }[];
-    };
+    if (marker.status !== 200) {
+      // Not started yet, or started before midnight. Either way we cannot say,
+      // and "unknown" leaves the waiting page showing what it already shows.
+      return { state: "unknown" };
+    }
 
-    const run = (body.workflow_runs ?? []).find((candidate) => candidate.name === slug);
-    if (!run) return { state: "unknown" };
+    const body = (await marker.json()) as { content?: string; encoding?: string };
+    let startedAt = NaN;
+    let run: string | undefined;
+    if (body.content && body.encoding === "base64") {
+      const decoded = JSON.parse(Buffer.from(body.content, "base64").toString("utf8")) as {
+        startedAt?: unknown;
+        run?: unknown;
+      };
+      if (typeof decoded.startedAt === "string") startedAt = Date.parse(decoded.startedAt);
+      if (typeof decoded.run === "string") run = decoded.run;
+    }
 
-    const url = typeof run.html_url === "string" ? run.html_url : undefined;
-    const startedAt = typeof run.run_started_at === "string" ? Date.parse(run.run_started_at) : NaN;
     const minutes = Number.isFinite(startedAt)
       ? Math.max(0, Math.round((Date.now() - startedAt) / 60_000))
       : undefined;
 
-    const finished = run.status === "completed";
-    if (!finished) {
-      return {
-        state: "building",
-        ...(url ? { run: url } : {}),
-        ...(minutes === undefined ? {} : { minutes }),
-      };
+    // Started, no deployment record, and long past the time a build takes. We
+    // cannot read the run's own verdict without the Actions permission, so this
+    // is inferred — generously, because telling a brand it failed while it is
+    // still going is worse than letting the clock run a few minutes longer.
+    if (minutes !== undefined && minutes > STALE_AFTER_MINUTES) {
+      return { state: "failed", ...(run ? { run } : {}) };
     }
 
-    // Completed without a deployment record means the run finished and nothing
-    // was published — which the workflow now treats as a failure too.
     return {
-      state: run.conclusion === "success" ? "unknown" : "failed",
-      ...(url ? { run: url } : {}),
+      state: "building",
+      ...(run ? { run } : {}),
+      ...(minutes === undefined ? {} : { minutes }),
     };
   } catch (error) {
-    console.error(`[status] could not read the runs: ${(error as Error).message}`);
+    console.error(`[status] could not read the build marker: ${(error as Error).message}`);
     return { state: "unknown" };
   }
 }

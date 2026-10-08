@@ -56,8 +56,13 @@ function stubGitHub({
     if (url.includes("/dispatches")) {
       return new Response(null, { status: dispatchStatus });
     }
-    if (url.includes("/actions/workflows/")) {
-      return new Response(JSON.stringify({ total_count: runsToday }), { status: runsStatus });
+    if (url.includes("/contents/builds/")) {
+      // The cap counts the start markers each run writes, which a token with
+      // only Contents:read can see. It used to read the Actions API, which
+      // needs a permission the org's approval flow would not grant.
+      if (runsStatus !== 200) return new Response("", { status: runsStatus });
+      const entries = Array.from({ length: runsToday }, (_, i) => ({ name: `brand-${i}.json` }));
+      return new Response(JSON.stringify(entries), { status: 200 });
     }
     // The "has this brand already been published" check, which reads the
     // factory's own deployment record rather than looking for another repo.
@@ -146,6 +151,14 @@ describe("dispatchBuild", () => {
 
   it("still builds while the day has room", async () => {
     const gh = stubGitHub({ runsToday: 11 });
+    expect((await dispatchBuild(BRAND)).started).toBe(true);
+    expect(gh.dispatched()).toBe(true);
+  });
+
+  it("treats a missing day folder as zero, not as a failure", async () => {
+    // No builds yet today means the directory does not exist. Reading that as
+    // "cannot count" would refuse the first build of every morning.
+    const gh = stubGitHub({ runsStatus: 404 });
     expect((await dispatchBuild(BRAND)).started).toBe(true);
     expect(gh.dispatched()).toBe(true);
   });
