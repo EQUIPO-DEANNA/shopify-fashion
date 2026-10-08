@@ -25,7 +25,6 @@ const examples = [
     stats: [
       ["Prendas en el probador", "515"],
       ["Pestañas de categoría", "6"],
-      ["Construida en", "Semanas"],
     ],
   },
   {
@@ -40,7 +39,6 @@ const examples = [
     stats: [
       ["Prendas en el probador", "63"],
       ["Pestañas de categoría", "7"],
-      ["Construida en", "Días"],
     ],
   },
 ];
@@ -93,7 +91,7 @@ export function Examples() {
                   {t(example.blurb)}
                 </p>
 
-                <dl className="mt-8 grid grid-cols-3 gap-px border border-border bg-border">
+                <dl className="mt-8 grid grid-cols-2 gap-px border border-border bg-border">
                   {example.stats.map(([label, value]) => (
                     <div key={label} className="bg-card px-4 py-4">
                       <dt className="text-[0.55rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -118,7 +116,7 @@ export function Examples() {
       <Reveal delay={200}>
         <p className="mt-14 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           {t(
-            "La primera llevó semanas y se hizo a mano. La segunda, días. La tuya se construye sola en unos diez minutos, porque lo que antes hacíamos a mano ahora lo hace la máquina.",
+            "La tuya se construye sola en unos diez minutos: lee tu catálogo, coge tus colores y tu tipografía, y se publica.",
           )}
         </p>
       </Reveal>

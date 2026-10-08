@@ -195,12 +195,9 @@ export const EN: Record<string, string> = {
     "The second brand. Same engine, different brand, different host, different world. Nothing was written by hand twice.",
   "Prendas en el probador": "Garments in the try-on",
   "Pestañas de categoría": "Category tabs",
-  "Construida en": "Built in",
-  Semanas: "Weeks",
-  Días: "Days",
   "Abrir la experiencia": "Open the experience",
-  "La primera llevó semanas y se hizo a mano. La segunda, días. La tuya se construye sola en unos diez minutos, porque lo que antes hacíamos a mano ahora lo hace la máquina.":
-    "The first took weeks and was made by hand. The second took days. Yours builds itself in about ten minutes, because what we used to do by hand the machine now does.",
+  "La tuya se construye sola en unos diez minutos: lee tu catálogo, coge tus colores y tu tipografía, y se publica.":
+    "Yours builds itself in about ten minutes: it reads your catalogue, takes your colours and your type, and publishes.",
 
   /* --------------------------------------------------------- three things */
   "Lo que necesitamos de la marca": "What we need from the brand",
