@@ -141,7 +141,7 @@ describe("analyseStore", () => {
     // Both Oxford shirts reach the catalogue through their title.
     const camisa = result.families.find((f) => f.id === "camisa");
     expect(camisa?.count).toBe(2);
-    expect(result.warnings.some((w) => /EMPTY product_type/.test(w))).toBe(true);
+    expect(result.warnings.some((w) => /product_type VAC/.test(w))).toBe(true);
   });
 
   it("resolves an unrecognisable product_type by majority vote of its titles", async () => {
@@ -168,14 +168,16 @@ describe("analyseStore", () => {
   it("keeps sold-out garments, and says so", async () => {
     const result = await analyseFixture();
     expect(result.families.find((f) => f.id === "polo")?.count).toBe(3);
-    expect(result.warnings.some((w) => /no available size/.test(w))).toBe(true);
+    expect(result.warnings.some((w) => /ninguna talla disponible/.test(w))).toBe(true);
   });
 
   it("reports what it could not classify rather than dropping it in silence", async () => {
     const result = await analyseFixture();
     expect(result.counts.unclassified).toBe(1);
     expect(result.unclassified[0]?.handle).toBe("mystery");
-    expect(result.warnings.some((w) => /matched nothing we recognise/.test(w))).toBe(true);
+    expect(result.warnings.some((w) => /no coinciden con nada que reconozcamos/.test(w))).toBe(
+      true,
+    );
   });
 
   it("offers only tops as picker tabs, and only where there are enough", async () => {
@@ -195,7 +197,7 @@ describe("analyseStore", () => {
     expect(labels["chaqueta"]).toBe("CHAQUETAS");
     // "JERSEYS" would be the machine-made plural; the tab is the most visible
     // text on the page, so it gets the right one.
-    expect(result.warnings.some((w) => /No Spanish label/.test(w))).toBe(false);
+    expect(result.warnings.some((w) => /No hay etiqueta en espa/.test(w))).toBe(false);
   });
 
   it("proposes budget bands a shopper can tell apart", async () => {
@@ -218,7 +220,7 @@ describe("analyseStore", () => {
     const result = await analyseStore("www.example-shop.com");
     expect(result.counts.total).toBe(250);
     expect(fetchMock).toHaveBeenCalledTimes(2); // page 1, then the repeat that ends it
-    expect(result.warnings.some((w) => /ignoring \?page/.test(w))).toBe(true);
+    expect(result.warnings.some((w) => /ignorando \?page/.test(w))).toBe(true);
   });
 
   it("explains a storefront that answers with HTML instead of a feed", async () => {
@@ -226,13 +228,13 @@ describe("analyseStore", () => {
       "fetch",
       vi.fn(async () => new Response("<!doctype html><html></html>", { status: 200 })),
     );
-    await expect(analyseStore("www.example-shop.com")).rejects.toThrow(/password-protected/);
+    await expect(analyseStore("www.example-shop.com")).rejects.toThrow(/contraseña/);
   });
 
   it("refuses an address that is not one before making any request", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await expect(analyseStore("acme")).rejects.toThrow(/does not look like a shop address/);
+    await expect(analyseStore("acme")).rejects.toThrow(/no parece la dirección de una tienda/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

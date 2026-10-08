@@ -106,7 +106,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /** Strip protocol, path, port, trailing slash and stray whitespace off a domain. */
 export function normaliseDomain(input: string): string {
   if (typeof input !== "string" || !input.trim()) {
-    throw new Error("A shop address is required, for example www.yourbrand.com.");
+    throw new Error("Hace falta la dirección de una tienda, por ejemplo www.tumarca.com.");
   }
   const host = input
     .trim()
@@ -118,7 +118,9 @@ export function normaliseDomain(input: string): string {
   // A hostname, not a search phrase. Catches "acme" and "www.acme .com" before
   // they turn into a confusing DNS error three calls deeper.
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(host)) {
-    throw new Error(`"${input}" does not look like a shop address. Write it as www.yourbrand.com.`);
+    throw new Error(
+      `"${input}" no parece la dirección de una tienda. Escríbela como www.tumarca.com.`,
+    );
   }
   return host;
 }
@@ -163,8 +165,8 @@ async function fetchPage(
       }
       if (Date.now() >= deadline) throw new OutOfTime();
       throw new Error(
-        `We could not reach https://${domain}/products.json (${(err as Error).message}). ` +
-          `Check the address, and that the shop is publicly reachable.`,
+        `No hemos podido conectar con https://${domain}/products.json (${(err as Error).message}). ` +
+          `Comprueba la dirección y que la tienda sea accesible públicamente.`,
       );
     }
 
@@ -176,15 +178,15 @@ async function fetchPage(
       } catch {
         // A password-protected or non-Shopify store answers 200 with HTML.
         throw new Error(
-          `https://${domain}/products.json answered, but not with JSON. The shop is probably ` +
-            `password-protected, or it is not a Shopify store.`,
+          `https://${domain}/products.json ha respondido, pero no con JSON. Lo más probable es ` +
+            `que la tienda tenga contraseña, o que no sea una tienda Shopify.`,
         );
       }
       const products = (body as { products?: unknown } | null)?.products;
       if (!Array.isArray(products)) {
         throw new Error(
-          `https://${domain}/products.json returned JSON with no "products" list. That does ` +
-            `not look like a Shopify product feed.`,
+          `https://${domain}/products.json ha devuelto JSON sin lista de "products". Eso no ` +
+            `parece un feed de productos de Shopify.`,
         );
       }
       return products as ShopifyProduct[];
@@ -199,18 +201,21 @@ async function fetchPage(
 
     if (res.status === 401 || res.status === 403) {
       throw new Error(
-        `https://${domain}/products.json returned ${res.status}. The storefront is ` +
-          `password-protected or blocking us. Lift the password, or tell us and we will read ` +
-          `the catalogue another way.`,
+        `https://${domain}/products.json ha devuelto ${res.status}. La tienda tiene contraseña ` +
+          `o nos está bloqueando, normalmente con un escudo antibots. Quita el bloqueo para ` +
+          `nosotros, o dínoslo y leemos el catálogo de otra forma.`,
       );
     }
     if (res.status === 404) {
       throw new Error(
-        `https://${domain}/products.json returned 404, so there is no public Shopify feed at ` +
-          `that address. Check for a redirect — the shop often lives on shop.${domain}.`,
+        `https://${domain}/products.json ha devuelto 404, así que no hay feed público de ` +
+          `Shopify en esa dirección. Mira si hay una redirección: muchas tiendas viven en ` +
+          `shop.${domain}.`,
       );
     }
-    throw new Error(`https://${domain}/products.json page ${page} returned ${res.status}.`);
+    throw new Error(
+      `https://${domain}/products.json ha devuelto ${res.status} en la página ${page}.`,
+    );
   }
 }
 
@@ -242,15 +247,15 @@ async function fetchAll(
       if (err instanceof OutOfTime && byHandle.size) {
         truncated = true;
         warnings.push(
-          `We stopped after ${byHandle.size} products to keep this page responsive. The whole ` +
-            `catalogue is read again, without a time limit, when the experience is built.`,
+          `Hemos parado en ${byHandle.size} productos para que la página siga respondiendo. El ` +
+            `catálogo entero se lee otra vez, sin límite de tiempo, al construir la experiencia.`,
         );
         break;
       }
       if (err instanceof OutOfTime) {
         throw new Error(
-          `https://${domain} did not answer in time. The shop may be slow right now — try ` +
-            `again in a minute.`,
+          `https://${domain} no ha respondido a tiempo. Puede que la tienda esté lenta ahora ` +
+            `mismo; inténtalo dentro de un minuto.`,
         );
       }
       throw err;
@@ -263,8 +268,8 @@ async function fetchAll(
 
     if (byHandle.size === before) {
       warnings.push(
-        `Page ${page} of the feed added no new product, so we stopped at ${byHandle.size}. If ` +
-          `the shop has more, its products.json is ignoring ?page.`,
+        `La página ${page} del feed no añadió ningún producto nuevo, así que paramos en ` +
+          `${byHandle.size}. Si la tienda tiene más, su products.json está ignorando ?page.`,
       );
       truncated = true;
       break;
@@ -273,8 +278,8 @@ async function fetchAll(
     if (page === maxPages) {
       truncated = true;
       warnings.push(
-        `We read the first ${byHandle.size} products. The rest are read when the experience ` +
-          `is built.`,
+        `Hemos leído los primeros ${byHandle.size} productos. El resto se leen al construir la ` +
+          `experiencia.`,
       );
     }
   }
@@ -368,7 +373,7 @@ function resolveTypeMap(products: ShopifyProduct[], warnings: string[]): Map<str
   if (mixed.length) {
     const more = mixed.length > 6 ? `; and ${mixed.length - 6} more` : "";
     warnings.push(
-      `Mixed product types (every product under a type takes that type's family): ` +
+      `Tipos de producto mezclados (cada producto hereda la familia de su tipo): ` +
         `${mixed.slice(0, 6).join("; ")}${more}.`,
     );
   }
@@ -381,7 +386,9 @@ function labelFor(id: string, warnings: string[]): string {
   if (label) return label;
   // Falling back beats crashing, but a machine-made Spanish plural will
   // eventually be wrong, so it has to be said out loud.
-  warnings.push(`No Spanish label for the "${id}" family — using "${id.toUpperCase()}S" for now.`);
+  warnings.push(
+    `No hay etiqueta en español para la familia "${id}"; usamos "${id.toUpperCase()}S" de momento.`,
+  );
   return `${id.toUpperCase()}S`;
 }
 
@@ -423,7 +430,7 @@ function nextRung(value: number): number {
 function budgetBands(sortedPrices: number[], symbol: string, warnings: string[]): Budget[] {
   const unlimited: Budget = { label: "SIN LÍMITE", max: null };
   if (!sortedPrices.length) {
-    warnings.push("No product carries a price, so we could not propose budget bands.");
+    warnings.push("Ningún producto tiene precio, así que no hemos podido proponer tramos.");
     return [unlimited];
   }
 
@@ -451,15 +458,15 @@ function budgetBands(sortedPrices: number[], symbol: string, warnings: string[])
     const here = cuts[i] ?? 0;
     if (under(here) === under(previous)) {
       warnings.push(
-        `Budget band ${symbol}${previous}–${symbol}${here} contains no products; these prices ` +
-          `are too clustered for four bands.`,
+        `El tramo ${symbol}${previous}–${symbol}${here} no contiene ningún producto: los ` +
+          `precios están demasiado juntos para cuatro tramos.`,
       );
     }
   }
   if (under(first) === sortedPrices.length) {
     warnings.push(
-      `The first budget band (${symbol}${first}) already covers the whole catalogue, so the ` +
-        `others select nothing extra.`,
+      `El primer tramo (${symbol}${first}) ya cubre todo el catálogo, así que los demás no ` +
+        `seleccionan nada más.`,
     );
   }
 
@@ -492,8 +499,8 @@ export async function analyseStore(
 
   if (!products.length) {
     throw new Error(
-      `https://${host}/products.json returned no products. The shop is empty, or every ` +
-        `product is hidden from the public feed.`,
+      `https://${host}/products.json no ha devuelto ningún producto. O la tienda está vacía, ` +
+        `o todos los productos están ocultos del feed público.`,
     );
   }
 
@@ -606,29 +613,28 @@ export async function analyseStore(
       .map((item) => `[${item.type}] ${item.title}`)
       .join("; ");
     warnings.push(
-      `${unclassified.length} product(s) matched nothing we recognise and would not appear ` +
-        `anywhere: ${sample}${unclassified.length > 6 ? "; …" : ""}. Tell us what they are and ` +
-        `we will add them.`,
+      `${unclassified.length} producto(s) no coinciden con nada que reconozcamos y no aparecerían ` +
+        `en ningún sitio: ${sample}${unclassified.length > 6 ? "; …" : ""}. Dinos qué son y los añadimos.`,
     );
   }
   if (!families.length) {
     warnings.push(
-      `No garment family has ${MIN_FOR_TAB} or more products, so the try-on picker would have ` +
-        `no tabs at all. This catalogue cannot drive a try-on experience as it stands.`,
+      `Ninguna familia de prendas tiene ${MIN_FOR_TAB} productos o más, así que el probador no ` +
+        `tendría ninguna pestaña. Este catálogo no puede sostener una experiencia tal cual está.`,
     );
   }
   if (tooThin.length) {
     warnings.push(
-      `Too thin for their own tab (fewer than ${MIN_FOR_TAB} products), so they are tryable but ` +
-        `not reachable from the picker: ${tooThin.join(", ")}.`,
+      `Demasiado pocas para tener pestaña propia (menos de ${MIN_FOR_TAB} productos): se pueden ` +
+        `probar pero no se llega a ellas desde el probador: ${tooThin.join(", ")}.`,
     );
   }
   if (titleRescued.length) {
     const first = titleRescued[0];
     warnings.push(
-      `${titleRescued.length} product(s) have an EMPTY product_type and were rescued by their ` +
-        `title or tags (for example "${first?.title}" as ${first?.category}). Reading the type ` +
-        `alone would drop them.`,
+      `${titleRescued.length} producto(s) tienen el product_type VACÍO y los hemos rescatado por ` +
+        `su título o sus etiquetas (por ejemplo "${first?.title}" como ${first?.category}). ` +
+        `Leyendo solo el tipo se perderían.`,
     );
   }
 
@@ -640,33 +646,33 @@ export async function analyseStore(
   const orphans = [...fallbackOnly].filter(([category]) => !viaType.has(category));
   if (orphans.length) {
     warnings.push(
-      `Families reached only through the title/tag fallback, never through a product_type: ` +
-        `${orphans.map(([category, n]) => `${category} (${n})`).join(", ")}. Setting a ` +
-        `product_type on those products makes them reliable.`,
+      `Familias a las que solo se llega por título o etiqueta, nunca por un product_type: ` +
+        `${orphans.map(([category, n]) => `${category} (${n})`).join(", ")}. Poner un ` +
+        `product_type en esos productos las hace fiables.`,
     );
   }
   if (noImage.length) {
     warnings.push(
-      `${noImage.length} product(s) have no photograph and were skipped (for example ` +
-        `"${noImage[0]?.title}"). They reappear by themselves once the shop adds images.`,
+      `${noImage.length} producto(s) no tienen foto y los hemos saltado (por ejemplo ` +
+        `"${noImage[0]?.title}"). Reaparecen solos en cuanto la tienda añada imágenes.`,
     );
   }
   if (noPrice.length) {
     warnings.push(
-      `${noPrice.length} product(s) have no price and were skipped (for example ` +
+      `${noPrice.length} producto(s) no tienen precio y los hemos saltado (por ejemplo ` +
         `"${noPrice[0]?.title}").`,
     );
   }
   if (outOfStock) {
     warnings.push(
-      `${outOfStock} garment(s) have no available size. Kept on purpose — this is a try-on, not ` +
-        `a checkout — but expect some sold-out links through to the shop.`,
+      `${outOfStock} prenda(s) no tienen ninguna talla disponible. Las mantenemos a propósito: ` +
+        `esto es un probador, no un checkout. Eso sí, algún enlace llevará a un agotado.`,
     );
   }
   if (families.length > 9) {
     warnings.push(
-      `${families.length} picker tabs is a lot; we would normally trim the smallest to eight ` +
-        `or nine.`,
+      `${families.length} pestañas son muchas; normalmente recortaríamos las más pequeñas a ocho ` +
+        `o nueve.`,
     );
   }
 
